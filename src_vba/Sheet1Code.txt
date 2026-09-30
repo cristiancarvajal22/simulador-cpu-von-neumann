@@ -1,0 +1,54 @@
+Option Explicit
+
+' =====================================================================
+'  Codigo de la hoja Simulador
+'   - Editar una celda de la matriz de memoria escribe ese byte en la RAM
+'     (permite modificar instrucciones o datos en vivo).
+'   - Seleccionar una celda de la matriz la muestra en el inspector
+'     (hexadecimal, binario, decimal y mnemonico).
+' =====================================================================
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim zona As Range, c As Range, d As Long, v As Long, s As String
+    On Error GoTo fin
+
+    Set zona = Intersect(Target, Me.Range("MEM_GRID"))
+    If Not zona Is Nothing Then
+        Application.EnableEvents = False
+        For Each c In zona.Cells
+            d = MemDireccionDeCelda(c)
+            s = Trim$(CStr(c.Value))
+            If MemLeerEntrada(s, v) Then
+                MemWrite d, v
+                LogAgregar "EDIT", "--", t("Edici~on manual de memoria"), "RAM[" & Hex0x(d) & "] <- " & Hex0x(v)
+                Estado t("Memoria editada: M[") & HexH(d) & "] = " & HexH(v) & _
+                       "  (" & v & ", " & Bin8(v) & "b" & IIf(IsaExiste(v), ", como opcode: " & IsaFormato(v), "") & ")"
+            Else
+                MemPintar d
+                Estado t("Valor inv~alido '") & s & t("': escribe un byte en hexadecimal (00-FF), #123 en decimal o 8 bits terminados en b."), True
+            End If
+        Next c
+        MemInspeccionar d
+        GoTo fin
+    End If
+
+    Set zona = Intersect(Target, Me.Range("EDITOR_COD"))
+    If Not zona Is Nothing Then
+        Application.EnableEvents = False
+        For Each c In zona.Cells
+            EditorColorear c.Row - Me.Range("EDITOR_COD").Row + 1
+        Next c
+        Application.EnableEvents = True
+        Estado t("Programa modificado: pulsa LOAD para ensamblarlo y cargarlo en memoria.")
+    End If
+fin:
+    Application.EnableEvents = True
+End Sub
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    Dim d As Long
+    On Error Resume Next
+    If Target.Cells.Count <> 1 Then Exit Sub
+    d = MemDireccionDeCelda(Target)
+    If d >= 0 Then MemInspeccionar d
+End Sub
