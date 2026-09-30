@@ -1,0 +1,2792 @@
+
+=== MODULO: ThisWorkbook.cls ===
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_Base = "0{00020819-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet1.cls ===
+Attribute VB_Name = "Sheet1"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+Option Explicit
+
+' =====================================================================
+'  Codigo de la hoja Simulador
+'   - Editar una celda de la matriz de memoria escribe ese byte en la RAM
+'     (permite modificar instrucciones o datos en vivo).
+'   - Seleccionar una celda de la matriz la muestra en el inspector
+'     (hexadecimal, binario, decimal y mnemonico).
+' =====================================================================
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim zona As Range, c As Range, d As Long, v As Long, s As String
+    On Error GoTo fin
+
+    Set zona = Intersect(Target, Me.Range("MEM_GRID"))
+    If Not zona Is Nothing Then
+        Application.EnableEvents = False
+        For Each c In zona.Cells
+            d = MemDireccionDeCelda(c)
+            s = Trim$(CStr(c.Value))
+            If MemLeerEntrada(s, v) Then
+                MemWrite d, v
+                LogAgregar "EDIT", "--", t("Edici~on manual de memoria"), "RAM[" & Hex0x(d) & "] <- " & Hex0x(v)
+                Estado t("Memoria editada: M[") & HexH(d) & "] = " & HexH(v) & _
+                       "  (" & v & ", " & Bin8(v) & "b" & IIf(IsaExiste(v), ", como opcode: " & IsaFormato(v), "") & ")"
+            Else
+                MemPintar d
+                Estado t("Valor inv~alido '") & s & t("': escribe un byte en hexadecimal (00-FF), #123 en decimal o 8 bits terminados en b."), True
+            End If
+        Next c
+        MemInspeccionar d
+        GoTo fin
+    End If
+
+    Set zona = Intersect(Target, Me.Range("EDITOR_COD"))
+    If Not zona Is Nothing Then
+        Application.EnableEvents = False
+        For Each c In zona.Cells
+            EditorColorear c.Row - Me.Range("EDITOR_COD").Row + 1
+        Next c
+        Application.EnableEvents = True
+        Estado t("Programa modificado: pulsa LOAD para ensamblarlo y cargarlo en memoria.")
+    End If
+fin:
+    Application.EnableEvents = True
+End Sub
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+    Dim d As Long
+    On Error Resume Next
+    If Target.Cells.Count <> 1 Then Exit Sub
+    d = MemDireccionDeCelda(Target)
+    If d >= 0 Then MemInspeccionar d
+End Sub
+
+
+
+
+=== MODULO: Sheet2.cls ===
+Attribute VB_Name = "Sheet2"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet3.cls ===
+Attribute VB_Name = "Sheet3"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet4.cls ===
+Attribute VB_Name = "Sheet4"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet5.cls ===
+Attribute VB_Name = "Sheet5"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet6.cls ===
+Attribute VB_Name = "Sheet6"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet7.cls ===
+Attribute VB_Name = "Sheet7"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet8.cls ===
+Attribute VB_Name = "Sheet8"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: Sheet9.cls ===
+Attribute VB_Name = "Sheet9"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+=== MODULO: ModAnimacion.bas ===
+Attribute VB_Name = "ModAnimacion"
+Option Explicit
+
+' =====================================================================
+'  ModAnimacion - todo lo que se ve moverse en el diagrama.
+'
+'  Cableado = grafo de aristas (formas E_*). Una RUTA es una secuencia
+'  de aristas (hoja oculta _Rutas). Encender una ruta:
+'    - pinta sus aristas de naranja SIN cambiar el grosor,
+'    - las trae al frente (quedan por encima de las grises),
+'    - deja una sola punta de flecha, en el destino.
+'  Al apagarla, cada arista recupera su color y sus puntas de reposo
+'  (hoja oculta _Aristas).
+'
+'  Velocidad: el dato viaja a velocidad CONSTANTE (puntos/segundo), asi
+'  un bus largo y uno corto se recorren al mismo ritmo. El control
+'  deslizante (1..10) escala esa velocidad; 10 es el maximo.
+' =====================================================================
+
+Private Const COL_ON As Long = 3243501       ' ED7D31 naranja
+Private Const COL_FLASH As Long = 49407      ' FFC000 ambar
+Private Const COL_CHIP As Long = 6240798     ' 1E3A5F azul marino (valor actual)
+Private Const VEL_MAX As Double = 900        ' puntos por segundo con el control al maximo
+Private Const T_MIN_TRAMO As Double = 0.12   ' duracion minima de un recorrido (s) al maximo
+
+' =====================================================================
+'  VELOCIDAD
+' =====================================================================
+' Factor 0.15 (nivel 1, muy lento) .. 1.0 (nivel 10, maximo)
+Public Function Factor() As Double
+    Dim v As Long
+    v = CpuNum(R_VELOC)
+    If v < 1 Then v = 1
+    If v > 10 Then v = 10
+    Factor = 0.15 + 0.85 * (v - 1) / 9
+End Function
+
+Public Function Animando() As Boolean
+    Dim a As Variant
+    a = CpuGet(R_ANIMAR)
+    If VarType(a) = vbBoolean Then Animando = a Else Animando = (CStr(a) <> "False" And CStr(a) <> "0" And CStr(a) <> "")
+End Function
+
+' Pausa escalada por la velocidad
+Public Sub Pausa(ByVal segundosAlMaximo As Double)
+    Espera segundosAlMaximo / Factor()
+End Sub
+
+' =====================================================================
+'  RUTAS
+' =====================================================================
+Private Function FilaRuta(ByVal id As String) As Long
+    Dim ws As Worksheet, f As Variant
+    Set ws = Hoja(HOJA_RUTAS)
+    f = Application.Match(id, ws.Range("A:A"), 0)
+    If IsError(f) Then FilaRuta = 0 Else FilaRuta = CLng(f)
+End Function
+
+Public Sub EncenderRuta(ByVal id As String)
+    Dim ws As Worksheet, f As Long, partes As Variant, k As Long
+    Dim nom As String, dirn As Long, s As Shape, p As Long
+
+    Set ws = Hoja(HOJA_RUTAS)
+    f = FilaRuta(id)
+    If f = 0 Then Traza "Ruta inexistente: " & id: Exit Sub
+    partes = Split(CStr(ws.Cells(f, 2).Value), ";")
+    For k = LBound(partes) To UBound(partes)
+        p = InStr(partes(k), ":")
+        nom = Left$(partes(k), p - 1)
+        dirn = CLng(Mid$(partes(k), p + 1))
+        Set s = Forma(nom)
+        If Not s Is Nothing Then
+            s.Line.ForeColor.RGB = COL_ON
+            s.Line.DashStyle = msoLineSolid
+            s.Line.BeginArrowheadStyle = msoArrowheadNone
+            s.Line.EndArrowheadStyle = msoArrowheadNone
+            If k = UBound(partes) Then
+                If dirn > 0 Then s.Line.EndArrowheadStyle = msoArrowheadTriangle _
+                            Else s.Line.BeginArrowheadStyle = msoArrowheadTriangle
+            End If
+            s.ZOrder msoBringToFront
+        End If
+    Next k
+End Sub
+
+Public Sub ApagarRutas()
+    Dim ws As Worksheet, r As Long, ultima As Long, s As Shape
+    Set ws = Hoja(HOJA_ARISTAS)
+    ultima = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    For r = 2 To ultima
+        Set s = Forma(CStr(ws.Cells(r, 1).Value))
+        If Not s Is Nothing Then
+            If s.Line.ForeColor.RGB = COL_ON Then
+                s.Line.ForeColor.RGB = CLng(ws.Cells(r, 4).Value)
+                s.Line.BeginArrowheadStyle = IIf(ws.Cells(r, 2).Value = 1, msoArrowheadTriangle, msoArrowheadNone)
+                s.Line.EndArrowheadStyle = IIf(ws.Cells(r, 3).Value = 1, msoArrowheadTriangle, msoArrowheadNone)
+                If ws.Cells(r, 5).Value = 1 Then s.Line.DashStyle = msoLineDash
+            End If
+        End If
+    Next r
+End Sub
+
+' Enciende la ruta y, si la animacion esta activa, hace viajar el dato
+Public Sub Transferir(ByVal id As String, ByVal texto As String)
+    EncenderRuta id
+    If Animando() Then
+        Pausa 0.05
+        Viajar id, texto
+    End If
+End Sub
+
+' Mueve DATO_VIAJERO por la polilinea de la ruta a velocidad constante
+Public Sub Viajar(ByVal id As String, ByVal texto As String)
+    Dim ws As Worksheet, f As Long, n As Long, k As Long
+    Dim xs() As Double, ys() As Double, seg() As Double, total As Double
+    Dim v As Shape, dur As Double, t0 As Double, u As Double, d As Double, acum As Double, q As Double
+
+    ' sin valor no hay nada que mostrar: se ilumina la ruta y ya
+    If Len(texto) = 0 Then Exit Sub
+
+    Set ws = Hoja(HOJA_RUTAS)
+    f = FilaRuta(id)
+    If f = 0 Then Exit Sub
+    n = CLng(ws.Cells(f, 3).Value)
+    If n < 2 Then Exit Sub
+    ReDim xs(0 To n - 1): ReDim ys(0 To n - 1): ReDim seg(0 To n - 2)
+    For k = 0 To n - 1
+        xs(k) = ws.Cells(f, 4 + 2 * k).Value
+        ys(k) = ws.Cells(f, 5 + 2 * k).Value
+    Next k
+    For k = 0 To n - 2
+        seg(k) = Sqr((xs(k + 1) - xs(k)) ^ 2 + (ys(k + 1) - ys(k)) ^ 2)
+        total = total + seg(k)
+    Next k
+    If total <= 0 Then Exit Sub
+
+    Set v = Forma("DATO_VIAJERO")
+    If v Is Nothing Then Exit Sub
+    v.TextFrame2.TextRange.Text = texto
+    v.Visible = msoTrue
+    v.ZOrder msoBringToFront
+
+    dur = total / VEL_MAX
+    If dur < T_MIN_TRAMO Then dur = T_MIN_TRAMO
+    dur = dur / Factor()
+
+    t0 = Timer
+    Do
+        u = (Timer - t0) / dur
+        If u > 1 Or u < 0 Then u = 1
+        d = u * total: acum = 0
+        For k = 0 To n - 2
+            If acum + seg(k) >= d Or k = n - 2 Then
+                If seg(k) > 0 Then q = (d - acum) / seg(k) Else q = 0
+                If q > 1 Then q = 1
+                v.Left = xs(k) + (xs(k + 1) - xs(k)) * q - v.Width / 2
+                v.Top = ys(k) + (ys(k + 1) - ys(k)) * q - v.Height / 2
+                Exit For
+            End If
+            acum = acum + seg(k)
+        Next k
+        DoEvents
+    Loop While u < 1
+    v.Visible = msoFalse
+End Sub
+
+' =====================================================================
+'  CHIPS Y DESTELLOS
+' =====================================================================
+Public Sub Destello(ByVal nombreChip As String)
+    Dim s As Shape
+    If Not Animando() Then Exit Sub
+    Set s = Forma(nombreChip)
+    If s Is Nothing Then Exit Sub
+    s.Fill.ForeColor.RGB = COL_FLASH
+    s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(0, 0, 0)
+    Pausa 0.12
+    s.Fill.ForeColor.RGB = COL_CHIP
+    s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(255, 255, 255)
+End Sub
+
+' Nombre del chip que muestra un registro
+Public Function ChipDe(ByVal reg As String) As String
+    Select Case UCase$(reg)
+        Case "IROP", "IRARG": ChipDe = "VAL_IR"
+        Case "ALU": ChipDe = "VAL_COP"
+        Case Else: ChipDe = "VAL_" & UCase$(reg)
+    End Select
+End Function
+
+' =====================================================================
+'  PANELES
+' =====================================================================
+Public Sub FaseMostrar(ByVal fase As String)
+    Dim nombres As Variant, colores As Variant, k As Long, s As Shape
+    nombres = Array("FETCH", "DECODE", "EXECUTE", "STORE")
+    colores = Array(RGB(91, 155, 213), RGB(255, 192, 0), RGB(142, 124, 195), RGB(112, 173, 71))   ' colores de la diapositiva "Ciclos maquina"
+    For k = 0 To 3
+        Set s = Forma("FASE_" & nombres(k))
+        If Not s Is Nothing Then
+            If nombres(k) = fase Then
+                s.Fill.ForeColor.RGB = colores(k)
+                s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(255, 255, 255)
+            Else
+                s.Fill.ForeColor.RGB = RGB(231, 230, 230)
+                s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(127, 127, 127)
+            End If
+        End If
+    Next k
+    FijarTexto "SEC_TXT", fase
+End Sub
+
+' Rellena la lista del microprograma con el contenido de _Micro
+Public Sub MicroListaMostrar()
+    Dim ws As Worksheet, i As Long, n As Long, s As Shape
+    Set ws = Hoja(HOJA_MICRO)
+    n = CpuNum(R_NMICRO)
+    For i = 1 To 13
+        Set s = Forma("MICROP_" & Format$(i, "00"))
+        If Not s Is Nothing Then
+            If i <= n Then
+                s.Visible = msoTrue
+                s.TextFrame2.TextRange.Text = ws.Cells(i + 1, 2).Value & "   " & ws.Cells(i + 1, 3).Value
+            Else
+                s.TextFrame2.TextRange.Text = ""
+                s.Visible = msoFalse
+            End If
+        End If
+    Next i
+End Sub
+
+Public Sub MicroListaResaltar(ByVal actual As Long)
+    Dim i As Long, s As Shape
+    For i = 1 To 13
+        Set s = Forma("MICROP_" & Format$(i, "00"))
+        If Not s Is Nothing Then
+            If i = actual Then
+                s.Fill.ForeColor.RGB = COL_ON
+                s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(255, 255, 255)
+            ElseIf i < actual Then
+                s.Fill.ForeColor.RGB = RGB(242, 242, 242)
+                s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(128, 128, 128)
+            Else
+                s.Fill.ForeColor.RGB = RGB(255, 255, 255)
+                s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(0, 0, 0)
+            End If
+        End If
+    Next i
+End Sub
+
+Public Sub MicroTitulo(ByVal t As String)
+    FijarTexto "LBL_MICROPROG", t
+End Sub
+
+Public Sub DecodMostrar(ByVal op As Long)
+    Dim i As TInstr
+    If IsaExiste(op) Then
+        i = IsaInfo(op)
+        FijarTexto "DECOD_TXT", "Opcode " & HexH(op) & " -> " & IsaFormato(op) & " | " & _
+                   i.Bytes & IIf(i.Bytes = 1, " byte", " bytes") & " | modo " & IsaModo(op) & _
+                   IIf(Len(i.Flags) > 0, " | flags: " & Replace(Replace(Replace(Replace(i.Flags, "Z", "ZF "), "C", "CF "), "S", "SF "), "O", "OF "), "")
+        FijarTexto "VAL_DEC", IsaFormato(op)
+        ChipAlu IIf(i.Grupo = "ALU" Or i.Grupo = "CMP" Or i.Grupo = "UNARIA", IsaSimbolo(op), "")
+    Else
+        FijarTexto "DECOD_TXT", "Opcode " & HexH(op) & t(" no pertenece a la ISA: instrucci~on inv~alida")
+        FijarTexto "VAL_DEC", "??"
+    End If
+End Sub
+
+Public Sub DecodLimpiar()
+    FijarTexto "DECOD_TXT", t("Esperando una instrucci~on en el IR.")
+    FijarTexto "VAL_DEC", "-"
+    ChipAlu ""
+End Sub
+
+' Chip de la ALU: muestra la operacion; gris cuando la instruccion no la usa
+Public Sub ChipAlu(ByVal simbolo As String)
+    Dim s As Shape
+    Set s = Forma("VAL_COP")
+    If s Is Nothing Then Exit Sub
+    s.TextFrame2.TextRange.Text = simbolo
+    If Len(simbolo) = 0 Then
+        s.Fill.ForeColor.RGB = RGB(217, 217, 217)
+        s.Line.ForeColor.RGB = RGB(166, 166, 166)
+    Else
+        s.Fill.ForeColor.RGB = COL_CHIP
+        s.Line.ForeColor.RGB = RGB(18, 38, 63)
+    End If
+End Sub
+
+Public Sub Narrar(ByVal texto As String)
+    FijarTexto "NARRA_TXT", texto
+End Sub
+
+Public Sub RelojMostrar()
+    If CpuNum(R_HALT) = 1 Then
+        FijarTexto "VAL_RELOJ", "HLT"
+    Else
+        FijarTexto "VAL_RELOJ", "T " & CpuNum(R_CICLOS)
+    End If
+    FijarTexto "LBL_CONTADOR", t("Instrucciones: ") & CpuNum(R_INSTR) & "    Ciclos T: " & CpuNum(R_CICLOS)
+End Sub
+
+' El resaltado de la linea en ejecucion vive ahora en ModEditor, junto al
+' coloreado de sintaxis (tocar la negrita aqui lo destruiria).
+
+
+
+
+=== MODULO: ModCPU.bas ===
+Attribute VB_Name = "ModCPU"
+Option Explicit
+
+' =====================================================================
+'  ModCPU - registros, flags y ALU.
+'
+'  El estado vive en la hoja oculta _CPU (columna B, una fila por
+'  registro). Asi sobrevive aunque el proyecto VBA se reinicie, y el
+'  control deslizante y la casilla "Animar" pueden enlazarse a celdas.
+'
+'  Todos los registros son de 8 bits (0..255).
+' =====================================================================
+
+Public Const R_PC As Long = 1
+Public Const R_IROP As Long = 2        ' IR: byte de opcode
+Public Const R_IRARG As Long = 3       ' IR: byte de operando (inmediato o direccion)
+Public Const R_MAR As Long = 4
+Public Const R_MDR As Long = 5
+Public Const R_AX As Long = 6
+Public Const R_BX As Long = 7
+Public Const R_REN1 As Long = 8        ' registros de entrada de la ALU (temporales)
+Public Const R_REN2 As Long = 9
+Public Const R_ALU As Long = 10        ' latch de salida de la ALU
+Public Const R_ZF As Long = 11
+Public Const R_CF As Long = 12
+Public Const R_SF As Long = 13
+Public Const R_OF As Long = 14
+Public Const R_FASE As Long = 15       ' FETCH | DECODE | EXECUTE | STORE | HALT | READY
+Public Const R_MICRO As Long = 16      ' proxima micro-operacion a ejecutar (fila en _Micro)
+Public Const R_NMICRO As Long = 17     ' micro-operaciones de la instruccion en curso
+Public Const R_CICLOS As Long = 18     ' micro-operaciones ejecutadas (ciclos de reloj T)
+Public Const R_INSTR As Long = 19      ' instrucciones completadas
+Public Const R_HALT As Long = 20
+Public Const R_CORRIENDO As Long = 21
+Public Const R_PAUSA As Long = 22
+Public Const R_VELOC As Long = 23      ' enlazada al control deslizante (1..10)
+Public Const R_ANIMAR As Long = 24     ' enlazada a la casilla "Animar datos"
+Public Const R_SALTO As Long = 25      ' 1 si el salto condicional se toma
+Public Const R_PROGOK As Long = 26     ' 1 si hay un programa ensamblado en memoria
+Public Const R_LOGN As Long = 27
+Public Const R_PCINSTR As Long = 28    ' direccion donde empezo la instruccion en curso
+Public Const R_ULTMEM As Long = 29     ' ultima celda accedida (-1 ninguna)
+Public Const R_ULTMEMT As Long = 30    ' "R" lectura | "W" escritura
+Public Const R_ULTPC As Long = 31      ' celda marcada como PC en la matriz
+Public Const R_ULTLINEA As Long = 32   ' fila del editor resaltada
+Public Const R_SEL As Long = 33        ' direccion en el Selector
+
+' =====================================================================
+'  ESTADO
+' =====================================================================
+Public Function CpuGet(ByVal r As Long) As Variant
+    CpuGet = ThisWorkbook.Worksheets(HOJA_CPU).Cells(r, 2).Value
+End Function
+
+Public Function CpuNum(ByVal r As Long) As Long
+    CpuNum = CLng(Val(CStr(ThisWorkbook.Worksheets(HOJA_CPU).Cells(r, 2).Value)))
+End Function
+
+Public Sub CpuSet(ByVal r As Long, ByVal v As Variant)
+    ThisWorkbook.Worksheets(HOJA_CPU).Cells(r, 2).Value = v
+End Sub
+
+' Fila de estado de un registro visible por su nombre
+Public Function FilaReg(ByVal nombre As String) As Long
+    Select Case UCase$(nombre)
+        Case "PC": FilaReg = R_PC
+        Case "IROP": FilaReg = R_IROP
+        Case "IRARG", "IR": FilaReg = R_IRARG
+        Case "MAR": FilaReg = R_MAR
+        Case "MDR": FilaReg = R_MDR
+        Case "AX": FilaReg = R_AX
+        Case "BX": FilaReg = R_BX
+        Case "REN1": FilaReg = R_REN1
+        Case "REN2": FilaReg = R_REN2
+        Case "ALU": FilaReg = R_ALU
+        Case "SEL": FilaReg = R_SEL
+        Case "UNO": FilaReg = 0
+        Case Else: FilaReg = -1
+    End Select
+End Function
+
+Public Function RegLeer(ByVal nombre As String) As Long
+    Dim f As Long
+    f = FilaReg(nombre)
+    If f = 0 Then RegLeer = 1: Exit Function        ' la constante "1" de INC/DEC
+    If f < 0 Then Err.Raise vbObjectError + 1, "RegLeer", "Registro desconocido: " & nombre
+    RegLeer = CpuNum(f) And &HFF
+End Function
+
+' Escribe un registro (8 bits) y refresca su chip en el diagrama
+Public Sub RegEscribir(ByVal nombre As String, ByVal v As Long)
+    Dim f As Long
+    v = v And &HFF
+    f = FilaReg(nombre)
+    If f <= 0 Then Err.Raise vbObjectError + 2, "RegEscribir", "Registro no escribible: " & nombre
+    CpuSet f, v
+    RegPintar nombre
+    If UCase$(nombre) = "MAR" Then MemVentana v
+End Sub
+
+' Texto del chip de un registro
+Public Function RegTexto(ByVal nombre As String) As String
+    Dim v As Long
+    Select Case UCase$(nombre)
+        Case "AX", "BX"
+            v = RegLeer(nombre)
+            RegTexto = HexH(v) & " (" & v & ")"
+        Case "IROP", "IRARG", "IR"
+            RegTexto = TextoIR()
+        Case Else
+            RegTexto = HexH(RegLeer(nombre))
+    End Select
+End Function
+
+' IR = opcode + operando. Si la instruccion es de 1 byte, el operando
+' no se usa y se muestra "--".
+Public Function TextoIR() As String
+    Dim op As Long
+    op = CpuNum(R_IROP) And &HFF
+    If IsaExiste(op) Then
+        If IsaInfo(op).Bytes = 1 Then TextoIR = Hex2(op) & " --": Exit Function
+    End If
+    TextoIR = Hex2(op) & " " & Hex2(CpuNum(R_IRARG))
+End Function
+
+Public Sub RegPintar(ByVal nombre As String)
+    Select Case UCase$(nombre)
+        Case "IROP", "IRARG", "IR": FijarTexto "VAL_IR", TextoIR()
+        Case "ALU", "UNO": ' sin chip propio
+        Case Else: FijarTexto "VAL_" & UCase$(nombre), RegTexto(nombre)
+    End Select
+End Sub
+
+' =====================================================================
+'  FLAGS
+' =====================================================================
+Public Sub FlagEscribir(ByVal nombre As String, ByVal b As Boolean)
+    Dim r As Long, s As Shape
+    Select Case nombre
+        Case "ZF": r = R_ZF
+        Case "CF": r = R_CF
+        Case "SF": r = R_SF
+        Case "OF": r = R_OF
+    End Select
+    CpuSet r, IIf(b, 1, 0)
+    Set s = Forma("FLAG_" & nombre)
+    If s Is Nothing Then Exit Sub
+    s.TextFrame2.TextRange.Text = IIf(b, "1", "0")
+    If b Then
+        s.Fill.ForeColor.RGB = RGB(30, 58, 95)
+        s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(255, 255, 255)
+    Else
+        s.Fill.ForeColor.RGB = RGB(255, 255, 255)
+        s.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = RGB(0, 0, 0)
+    End If
+End Sub
+
+Public Function FlagLeer(ByVal nombre As String) As Boolean
+    Select Case nombre
+        Case "ZF": FlagLeer = (CpuNum(R_ZF) = 1)
+        Case "CF": FlagLeer = (CpuNum(R_CF) = 1)
+        Case "SF": FlagLeer = (CpuNum(R_SF) = 1)
+        Case "OF": FlagLeer = (CpuNum(R_OF) = 1)
+    End Select
+End Function
+
+Public Function TextoFlags() As String
+    TextoFlags = "ZF=" & CpuNum(R_ZF) & " CF=" & CpuNum(R_CF) & _
+                 " SF=" & CpuNum(R_SF) & " OF=" & CpuNum(R_OF)
+End Function
+
+' Evalua la condicion de un salto ("ZF=1", "CF=0"...). "" = incondicional.
+Public Function CondicionCumple(ByVal cond As String) As Boolean
+    If Len(cond) = 0 Then CondicionCumple = True: Exit Function
+    CondicionCumple = (FlagLeer(Left$(cond, 2)) = (Right$(cond, 1) = "1"))
+End Function
+
+' =====================================================================
+'  ALU
+'  Calcula a <op> b en 8 bits y actualiza SOLO los flags que la
+'  instruccion altera (semantica x86):
+'    ADD        CF = acarreo (resultado > 255)
+'    SUB / CMP  CF = prestamo (a < b)
+'    OF         desbordamiento con signo (complemento a 2)
+'    INC / DEC  no tocan CF
+'    AND OR XOR CF = 0, OF = 0
+'    NOT        no altera ningun flag
+' =====================================================================
+Public Function AluOperar(ByVal mn As String, ByVal a As Long, ByVal b As Long) As Long
+    Dim r As Long, bruto As Long
+    a = a And &HFF: b = b And &HFF
+
+    Select Case mn
+        Case "ADD"
+            bruto = a + b
+            r = bruto And &HFF
+            FlagEscribir "CF", (bruto > 255)
+            FlagEscribir "OF", (((a Xor r) And (b Xor r) And &H80) <> 0)
+        Case "SUB", "CMP"
+            bruto = a - b
+            r = (bruto + 256) And &HFF
+            FlagEscribir "CF", (a < b)
+            FlagEscribir "OF", (((a Xor b) And (a Xor r) And &H80) <> 0)
+        Case "INC"
+            r = (a + 1) And &HFF
+            FlagEscribir "OF", (a = &H7F)
+        Case "DEC"
+            r = (a + 255) And &HFF
+            FlagEscribir "OF", (a = &H80)
+        Case "AND": r = a And b: FlagEscribir "CF", False: FlagEscribir "OF", False
+        Case "OR":  r = a Or b:  FlagEscribir "CF", False: FlagEscribir "OF", False
+        Case "XOR": r = a Xor b: FlagEscribir "CF", False: FlagEscribir "OF", False
+        Case "NOT"
+            r = (Not a) And &HFF
+            CpuSet R_ALU, r
+            AluOperar = r
+            Exit Function                  ' NOT no altera flags
+        Case Else
+            Err.Raise vbObjectError + 3, "AluOperar", "Operacion ALU desconocida: " & mn
+    End Select
+
+    FlagEscribir "ZF", (r = 0)
+    FlagEscribir "SF", ((r And &H80) <> 0)
+    CpuSet R_ALU, r
+    AluOperar = r
+End Function
+
+' =====================================================================
+'  REINICIO Y REPINTADO
+' =====================================================================
+' RESET: registros y PC a cero (la memoria no se toca).
+Public Sub CpuReset()
+    Dim r As Long
+    For r = R_PC To R_OF
+        CpuSet r, 0
+    Next r
+    CpuSet R_FASE, "READY"
+    CpuSet R_MICRO, 0
+    CpuSet R_NMICRO, 0
+    CpuSet R_CICLOS, 0
+    CpuSet R_INSTR, 0
+    CpuSet R_HALT, 0
+    CpuSet R_SALTO, 0
+    CpuSet R_PCINSTR, 0
+    CpuSet R_SEL, 0
+    CpuPintarTodo
+End Sub
+
+Public Sub CpuPintarTodo()
+    Dim n As Variant
+    For Each n In Array("PC", "IR", "MAR", "MDR", "AX", "BX", "REN1", "REN2", "SEL")
+        RegPintar CStr(n)
+    Next n
+    FlagEscribir "ZF", FlagLeer("ZF")
+    FlagEscribir "CF", FlagLeer("CF")
+    FlagEscribir "SF", FlagLeer("SF")
+    FlagEscribir "OF", FlagLeer("OF")
+    MemVentana CpuNum(R_MAR)
+End Sub
+
+
+
+
+=== MODULO: ModEditor.bas ===
+Attribute VB_Name = "ModEditor"
+Option Explicit
+
+' =====================================================================
+'  ModEditor - presentacion del editor de ensamblador.
+'
+'  Colorea cada linea como lo haria un editor de codigo, usando el
+'  formato por caracteres de Excel (Range.Characters). El color no es
+'  decorativo: dice que ha entendido el ensamblador de cada palabra.
+'    comentario   gris claro en cursiva (no se ensambla)
+'    etiqueta     morado en negrita
+'    mnemonica    color segun el grupo de la instruccion
+'    registro     magenta
+'    [direccion]  verde azulado
+'    numero       ambar
+'    directiva    gris oscuro en negrita (ORG, DB)
+' =====================================================================
+
+Private Const COL_TXT As Long = 2105376     ' 202020
+Private Const COL_COMENT As Long = 10066329    ' 999999
+Private Const COL_ETIQ As Long = 10498160    ' 7030A0 morado
+Private Const COL_TRANS As Long = 12611584    ' 0070C0 azul
+Private Const COL_MEMORIA As Long = 11825152    ' 0070B4 azul memoria
+Private Const COL_ARIT As Long = 4227072     ' 008040 verde
+Private Const COL_LOGICA As Long = 9868800     ' 009696 verde azulado
+Private Const COL_SALTO As Long = 1137349     ' C55A11 naranja
+Private Const COL_CTRL As Long = 192         ' C00000 rojo
+Private Const COL_DIREC As Long = 5921370     ' 5A5A5A gris
+Private Const COL_REG As Long = 5243035     ' 9B0050 magenta
+Private Const COL_NUM As Long = 28351       ' BF6E00 ambar
+
+Private Const N_FILAS As Long = 40
+
+' =====================================================================
+'  COLOREADO
+' =====================================================================
+Public Sub EditorColorearTodo()
+    Dim i As Long
+    Application.ScreenUpdating = False
+    For i = 1 To N_FILAS
+        EditorColorear i
+    Next i
+    Application.ScreenUpdating = True
+End Sub
+
+Public Sub EditorColorear(ByVal fila As Long)
+    Dim c As Range, s As String, codigo As String
+    Dim pComent As Long, pEtq As Long, ini As Long
+
+    If fila < 1 Or fila > N_FILAS Then Exit Sub
+    Set c = Sim().Range("EDITOR_COD").Cells(fila, 1)
+    s = CStr(c.Value)
+
+    With c.Font
+        .color = COL_TXT
+        .Italic = False
+        .Bold = False
+    End With
+    If Len(Trim$(s)) = 0 Then Exit Sub
+
+    ' --- comentario: desde el ; hasta el final ---
+    pComent = InStr(s, ";")
+    If pComent > 0 Then
+        With c.Characters(pComent, Len(s) - pComent + 1).Font
+            .color = COL_COMENT
+            .Italic = True
+        End With
+        codigo = Left$(s, pComent - 1)
+    Else
+        codigo = s
+    End If
+    If Len(Trim$(codigo)) = 0 Then Exit Sub
+
+    ' --- etiqueta: lo que va antes de los dos puntos ---
+    pEtq = InStr(codigo, ":")
+    If pEtq > 0 Then
+        With c.Characters(1, pEtq).Font
+            .color = COL_ETIQ
+            .Bold = True
+        End With
+        ini = pEtq + 1
+    Else
+        ini = 1
+    End If
+
+    ColorearTokens c, codigo, ini
+End Sub
+
+' Recorre las palabras del codigo y pinta cada una segun lo que sea
+Private Sub ColorearTokens(ByVal c As Range, ByVal codigo As String, ByVal desde As Long)
+    Dim i As Long, ini As Long, tok As String, primera As Boolean, col As Long
+
+    primera = True
+    i = desde
+    Do While i <= Len(codigo)
+        If EsSeparador(Mid$(codigo, i, 1)) Then
+            i = i + 1
+        Else
+            ini = i
+            Do While i <= Len(codigo)
+                If EsSeparador(Mid$(codigo, i, 1)) Then Exit Do
+                i = i + 1
+            Loop
+            tok = Mid$(codigo, ini, i - ini)
+            col = ColorDeToken(tok, primera)
+            If col >= 0 Then
+                c.Characters(ini, Len(tok)).Font.color = col
+                If primera Then c.Characters(ini, Len(tok)).Font.Bold = True
+            End If
+            primera = False
+        End If
+    Loop
+End Sub
+
+Private Function EsSeparador(ByVal ch As String) As Boolean
+    EsSeparador = (ch = " " Or ch = vbTab Or ch = ",")
+End Function
+
+' -1 = dejar el color base
+Private Function ColorDeToken(ByVal tok As String, ByVal esPrimera As Boolean) As Long
+    Dim u As String, v As Long
+    u = UCase$(Trim$(tok))
+    If Len(u) = 0 Then ColorDeToken = -1: Exit Function
+
+    If esPrimera Then
+        If u = "ORG" Or u = "DB" Then ColorDeToken = COL_DIREC: Exit Function
+        ColorDeToken = ColorDeMnemonica(u)
+        Exit Function
+    End If
+
+    If u = "AX" Or u = "BX" Then ColorDeToken = COL_REG: Exit Function
+    If Left$(u, 1) = "[" Then ColorDeToken = COL_MEMORIA: Exit Function
+    If LeerNumero(Replace(u, "-", ""), v) Then ColorDeToken = COL_NUM: Exit Function
+    ColorDeToken = COL_ETIQ           ' referencia a una etiqueta (destino de salto)
+End Function
+
+Private Function ColorDeMnemonica(ByVal mn As String) As Long
+    ' alias de x86 que el ensamblador acepta
+    If mn = "JE" Or mn = "JNE" Then ColorDeMnemonica = COL_SALTO: Exit Function
+    If Not IsaEsMnemonica(mn) Then ColorDeMnemonica = COL_CTRL: Exit Function   ' desconocida: en rojo
+
+    Select Case IsaGrupoDeMnemonica(mn)
+        Case "TRANS": ColorDeMnemonica = COL_TRANS
+        Case "MEMR", "MEMW": ColorDeMnemonica = COL_MEMORIA
+        Case "ALU", "CMP", "UNARIA"
+            If mn = "AND" Or mn = "OR" Or mn = "XOR" Or mn = "NOT" Then
+                ColorDeMnemonica = COL_LOGICA
+            Else
+                ColorDeMnemonica = COL_ARIT
+            End If
+        Case "SALTO": ColorDeMnemonica = COL_SALTO
+        Case Else: ColorDeMnemonica = COL_CTRL
+    End Select
+End Function
+
+' =====================================================================
+'  RESALTADO DE LA LINEA EN EJECUCION
+'  Solo cambia el fondo: si tocara la negrita se perderia el coloreado.
+' =====================================================================
+Public Sub EditorResaltar(ByVal fila As Long)
+    Dim ws As Worksheet, anterior As Long
+    Set ws = Sim()
+    anterior = CpuNum(R_ULTLINEA)
+    Application.EnableEvents = False
+    If anterior > 0 Then
+        Intersect(ws.Range("EDITOR_DIR").Cells(anterior, 1).EntireRow, ws.Range("EDITOR_TODO")).Interior.color = RGB(255, 255, 255)
+        ws.Range("EDITOR_DIR").Cells(anterior, 1).Interior.color = RGB(247, 247, 247)
+        ws.Range("EDITOR_HEX").Cells(anterior, 1).Interior.color = RGB(247, 247, 247)
+    End If
+    If fila > 0 Then
+        Intersect(ws.Range("EDITOR_DIR").Cells(fila, 1).EntireRow, ws.Range("EDITOR_TODO")).Interior.color = RGB(255, 230, 153)
+    End If
+    Application.EnableEvents = True
+    CpuSet R_ULTLINEA, fila
+End Sub
+
+
+
+=== MODULO: ModEnsamblador.bas ===
+Attribute VB_Name = "ModEnsamblador"
+Option Explicit
+
+' =====================================================================
+'  ModEnsamblador - traduce el programa del editor a bytes en memoria.
+'
+'  Ensamblador de DOS PASADAS:
+'    1a pasada: calcula la direccion y el tamano de cada linea y anota
+'               las etiquetas (las de mas adelante aun no tienen valor).
+'    2a pasada: resuelve etiquetas y numeros y escribe los bytes.
+'
+'  Sintaxis de una linea:   [etiqueta:] [instruccion | directiva] [; comentario]
+'    ORG n          fija la direccion donde se sigue ensamblando
+'    DB a, b, ...   reserva bytes con esos valores (datos)
+'  Numeros:  decimal 12 | hex 0Ch o 0x0C | binario 1010b | negativo -1
+'  Alias x86 aceptados:  MOV reg,[dir] = LOAD   MOV [dir],reg = STORE
+'                        JE = JZ   JNE = JNZ
+' =====================================================================
+
+Private Const N_LINEAS As Long = 40
+
+Private mLoc(1 To N_LINEAS) As Long       ' direccion de la linea
+Private mTam(1 To N_LINEAS) As Long       ' bytes que ocupa
+Private mTipo(1 To N_LINEAS) As String    ' "" vacia | I instruccion | D datos | ORG
+Private mOp(1 To N_LINEAS) As Long        ' opcode (si es instruccion)
+Private mArg(1 To N_LINEAS) As String     ' texto del operando que va al 2o byte
+Private mDB(1 To N_LINEAS) As String      ' lista de valores de un DB
+Private mError As String
+Private mErrorFila As Long
+
+' =====================================================================
+'  PUNTO DE ENTRADA
+'  Devuelve "OK ..." o "ERR ..." (el texto tambien va a la barra de estado)
+' =====================================================================
+Public Function Ensamblar() As String
+    Dim ws As Worksheet, cod As Range, etiquetas As Object
+    Dim i As Long, total As Long, maxDir As Long, minDato As Long
+
+    Set ws = Sim()
+    Set cod = ws.Range("EDITOR_COD")
+    Set etiquetas = CreateObject("Scripting.Dictionary")
+    etiquetas.CompareMode = vbTextCompare
+    mError = "": mErrorFila = 0
+
+    Application.EnableEvents = False
+    cod.Interior.color = RGB(255, 255, 255)
+    ws.Range("EDITOR_DIR").ClearContents
+    ws.Range("EDITOR_HEX").ClearContents
+    Application.EnableEvents = True
+
+    If Not PrimeraPasada(cod, etiquetas) Then GoTo fallo
+    MemReset
+    If Not SegundaPasada(cod, etiquetas, total, maxDir, minDato) Then GoTo fallo
+
+    CpuSet R_PROGOK, 1
+    EditorColorearTodo
+    Ensamblar = "OK " & total & " bytes"
+    Estado t("Programa cargado: ") & total & t(" bytes. C~odigo en 00h-") & HexH(maxDir) & _
+           IIf(minDato <= 255, ", datos desde " & HexH(minDato), "") & t(". Pulsa STEP o RUN.")
+    Exit Function
+
+fallo:
+    CpuSet R_PROGOK, 0
+    EditorColorearTodo
+    If mErrorFila > 0 Then cod.Cells(mErrorFila, 1).Interior.color = RGB(255, 199, 206)
+    Ensamblar = "ERR linea " & mErrorFila & ": " & mError
+    Estado t("Error en la l~inea ") & mErrorFila & ": " & mError, True
+End Function
+
+' =====================================================================
+'  PRIMERA PASADA
+' =====================================================================
+Private Function PrimeraPasada(ByVal cod As Range, ByVal etiquetas As Object) As Boolean
+    Dim i As Long, loc As Long, linea As String, etq As String, resto As String
+    Dim mn As String, ops() As String, t1 As String, t2 As String, op As Long, v As Long
+
+    loc = 0
+    For i = 1 To N_LINEAS
+        mLoc(i) = loc: mTam(i) = 0: mTipo(i) = "": mOp(i) = -1: mArg(i) = "": mDB(i) = ""
+        linea = QuitarComentario(CStr(cod.Cells(i, 1).Value))
+        If Len(linea) = 0 Then GoTo siguiente
+
+        SepararEtiqueta linea, etq, resto
+        If Len(etq) > 0 Then
+            If Not EsIdentificador(etq) Then Falla i, t("Etiqueta inv~alida: ") & etq: Exit Function
+            If etiquetas.Exists(etq) Then Falla i, "Etiqueta repetida: " & etq: Exit Function
+            If EsRegistro(etq) Or IsaEsMnemonica(UCase$(etq)) Then Falla i, t("Nombre reservado como etiqueta: ") & etq: Exit Function
+        End If
+
+        SepararMnemonica resto, mn, ops
+        If Len(mn) = 0 Then                                ' solo etiqueta
+            If Len(etq) > 0 Then etiquetas(etq) = loc
+            GoTo siguiente
+        End If
+
+        Select Case mn
+            Case "ORG"
+                If UBound(ops) <> 0 Then Falla i, "ORG necesita una direccion": Exit Function
+                If Not LeerNumero(ops(0), v) Or v > 255 Then Falla i, t("Direcci~on de ORG inv~alida: ") & ops(0): Exit Function
+                loc = v: mLoc(i) = loc: mTipo(i) = "ORG"
+                If Len(etq) > 0 Then etiquetas(etq) = loc
+
+            Case "DB"
+                If UBound(ops) < 0 Then Falla i, "DB necesita al menos un valor": Exit Function
+                If Len(etq) > 0 Then etiquetas(etq) = loc
+                mTipo(i) = "D": mTam(i) = UBound(ops) + 1: mDB(i) = Join(ops, ",")
+                loc = loc + mTam(i)
+
+            Case Else
+                If Len(etq) > 0 Then etiquetas(etq) = loc
+                If Not ResolverOpcode(i, mn, ops, op) Then Exit Function
+                mTipo(i) = "I": mOp(i) = op: mTam(i) = IsaInfo(op).Bytes
+                loc = loc + mTam(i)
+        End Select
+
+        If loc > 256 Then Falla i, t("El programa no cabe en 256 bytes"): Exit Function
+siguiente:
+    Next i
+    PrimeraPasada = True
+End Function
+
+' Determina el opcode segun mnemonica y tipos de operando (y guarda el
+' texto del operando que ira en el segundo byte)
+Private Function ResolverOpcode(ByVal i As Long, ByVal mn As String, ops() As String, ByRef op As Long) As Boolean
+    Dim t1 As String, t2 As String, n As Long
+
+    n = UBound(ops) + 1
+    If n > 2 Then Falla i, "Demasiados operandos": Exit Function
+    If n >= 1 Then t1 = TipoOperando(ops(0))
+    If n >= 2 Then t2 = TipoOperando(ops(1))
+
+    ' alias x86
+    If mn = "JE" Then mn = "JZ"
+    If mn = "JNE" Then mn = "JNZ"
+    If mn = "MOV" And t2 = "MEM" Then mn = "LOAD"
+    If mn = "MOV" And t1 = "MEM" Then mn = "STORE"
+    ' en los saltos el operando es una direccion de destino, no un dato
+    If Left$(mn, 1) = "J" And t1 = "IMM" Then t1 = "DIR"
+
+    If Not IsaEsMnemonica(mn) Then Falla i, t("Instrucci~on desconocida: ") & mn: Exit Function
+    op = IsaBuscar(mn, t1, t2)
+    If op < 0 Then
+        Falla i, t("Combinaci~on no soportada: ") & mn & " " & DescribirTipos(t1, t2)
+        Exit Function
+    End If
+
+    ' el operando que viaja en el 2o byte (inmediato, [dir] o destino)
+    If IsaInfo(op).Bytes = 2 Then
+        If t1 = "IMM" Or t1 = "MEM" Or t1 = "DIR" Then mArg(i) = ops(0) Else mArg(i) = ops(1)
+    End If
+    ResolverOpcode = True
+End Function
+
+' =====================================================================
+'  SEGUNDA PASADA
+' =====================================================================
+Private Function SegundaPasada(ByVal cod As Range, ByVal etiquetas As Object, _
+                               ByRef total As Long, ByRef maxDir As Long, ByRef minDato As Long) As Boolean
+    Dim ws As Worksheet, i As Long, k As Long, v As Long, bytesTxt As String
+    Dim Ocupado(0 To 255) As Boolean, vals() As String, d As Long
+
+    Set ws = Sim()
+    total = 0: maxDir = 0: minDato = 999
+    Application.EnableEvents = False
+
+    For i = 1 To N_LINEAS
+        Select Case mTipo(i)
+            Case "I"
+                bytesTxt = Hex2(mOp(i))
+                If Not Reservar(i, mLoc(i), Ocupado) Then GoTo fin
+                MemWrite mLoc(i), mOp(i)
+                MemMarcarOrigen mLoc(i), i, "I"
+                If mTam(i) = 2 Then
+                    If Not valor(i, mArg(i), etiquetas, v) Then GoTo fin
+                    If Not Reservar(i, mLoc(i) + 1, Ocupado) Then GoTo fin
+                    MemWrite mLoc(i) + 1, v
+                    MemMarcarOrigen mLoc(i) + 1, i, "O"
+                    bytesTxt = bytesTxt & " " & Hex2(v)
+                End If
+                If mLoc(i) + mTam(i) - 1 > maxDir Then maxDir = mLoc(i) + mTam(i) - 1
+                EscribirTexto ws.Range("EDITOR_DIR").Cells(i, 1), Hex2(mLoc(i))
+                EscribirTexto ws.Range("EDITOR_HEX").Cells(i, 1), bytesTxt
+                total = total + mTam(i)
+
+            Case "D"
+                vals = Split(mDB(i), ",")
+                bytesTxt = ""
+                For k = 0 To UBound(vals)
+                    d = mLoc(i) + k
+                    If Not valor(i, vals(k), etiquetas, v) Then GoTo fin
+                    If Not Reservar(i, d, Ocupado) Then GoTo fin
+                    MemWrite d, v
+                    MemMarcarOrigen d, i, "D"
+                    bytesTxt = bytesTxt & IIf(k > 0, " ", "") & Hex2(v)
+                Next k
+                If mLoc(i) < minDato Then minDato = mLoc(i)
+                EscribirTexto ws.Range("EDITOR_DIR").Cells(i, 1), Hex2(mLoc(i))
+                EscribirTexto ws.Range("EDITOR_HEX").Cells(i, 1), bytesTxt
+                total = total + mTam(i)
+
+            Case "ORG"
+                EscribirTexto ws.Range("EDITOR_DIR").Cells(i, 1), Hex2(mLoc(i))
+        End Select
+    Next i
+    SegundaPasada = True
+fin:
+    Application.EnableEvents = True
+End Function
+
+Private Function Reservar(ByVal i As Long, ByVal d As Long, Ocupado() As Boolean) As Boolean
+    If d > 255 Then Falla i, t("Se sale de la memoria (m~as all~a de FFh)"): Exit Function
+    If Ocupado(d) Then Falla i, t("Solapamiento: la direcci~on ") & HexH(d) & t(" ya est~a ocupada"): Exit Function
+    Ocupado(d) = True
+    Reservar = True
+End Function
+
+' Valor numerico de un operando: numero, etiqueta o [numero/etiqueta]
+Private Function valor(ByVal i As Long, ByVal s As String, ByVal etiquetas As Object, ByRef v As Long) As Boolean
+    Dim neg As Boolean
+    s = Trim$(s)
+    If Left$(s, 1) = "[" And Right$(s, 1) = "]" Then s = Trim$(Mid$(s, 2, Len(s) - 2))
+    If Left$(s, 1) = "-" Then neg = True: s = Trim$(Mid$(s, 2))
+
+    If LeerNumero(s, v) Then
+        ' ok
+    ElseIf etiquetas.Exists(s) Then
+        v = etiquetas(s)
+    ElseIf EsIdentificador(s) Then
+        Falla i, "Etiqueta no definida: " & s: Exit Function
+    Else
+        Falla i, t("Valor inv~alido: ") & s: Exit Function
+    End If
+
+    If neg Then
+        If v > 128 Then Falla i, t("Negativo fuera de rango (m~inimo -128): -") & v: Exit Function
+        v = (256 - v) And &HFF
+    ElseIf v > 255 Then
+        Falla i, t("No cabe en 8 bits (m~aximo 255): ") & s: Exit Function
+    End If
+    valor = True
+End Function
+
+' =====================================================================
+'  AYUDANTES DE PARSEO
+' =====================================================================
+Private Function QuitarComentario(ByVal s As String) As String
+    Dim p As Long
+    p = InStr(s, ";")
+    If p > 0 Then s = Left$(s, p - 1)
+    QuitarComentario = Trim$(Replace(s, vbTab, " "))
+End Function
+
+Private Sub SepararEtiqueta(ByVal linea As String, ByRef etq As String, ByRef resto As String)
+    Dim p As Long
+    p = InStr(linea, ":")
+    If p > 0 And InStr(Left$(linea, p), "[") = 0 Then
+        etq = Trim$(Left$(linea, p - 1))
+        resto = Trim$(Mid$(linea, p + 1))
+    Else
+        etq = "": resto = linea
+    End If
+End Sub
+
+Private Sub SepararMnemonica(ByVal s As String, ByRef mn As String, ByRef ops() As String)
+    Dim p As Long, lista As String, k As Long
+    s = Trim$(s)
+    If Len(s) = 0 Then mn = "": ops = Split(""): Exit Sub
+    p = InStr(s, " ")
+    If p = 0 Then
+        mn = UCase$(s): lista = ""
+    Else
+        mn = UCase$(Left$(s, p - 1)): lista = Trim$(Mid$(s, p + 1))
+    End If
+    If Len(lista) = 0 Then
+        ops = Split("")
+    Else
+        ops = Split(lista, ",")
+        For k = 0 To UBound(ops)
+            ops(k) = Trim$(ops(k))
+        Next k
+    End If
+End Sub
+
+Private Function TipoOperando(ByVal s As String) As String
+    s = UCase$(Trim$(s))
+    If s = "AX" Or s = "BX" Then
+        TipoOperando = s
+    ElseIf Left$(s, 1) = "[" And Right$(s, 1) = "]" Then
+        TipoOperando = "MEM"
+    ElseIf Len(s) = 0 Then
+        TipoOperando = ""
+    Else
+        TipoOperando = "IMM"          ' numero o etiqueta
+    End If
+End Function
+
+Private Function DescribirTipos(ByVal t1 As String, ByVal t2 As String) As String
+    Dim s As String
+    s = NombreT(t1)
+    If Len(t2) > 0 Then s = s & ", " & NombreT(t2)
+    DescribirTipos = s
+End Function
+
+' OJO: el parametro NO puede llamarse "t": VBA no distingue mayusculas y
+' taparia la funcion T() de ModUtil.
+Private Function NombreT(ByVal tipo As String) As String
+    Select Case tipo
+        Case "IMM": NombreT = "inmediato"
+        Case "MEM": NombreT = "[memoria]"
+        Case "DIR": NombreT = t("direcci~on")
+        Case "": NombreT = "(nada)"
+        Case Else: NombreT = tipo
+    End Select
+End Function
+
+Private Function EsRegistro(ByVal s As String) As Boolean
+    EsRegistro = (UCase$(s) = "AX" Or UCase$(s) = "BX")
+End Function
+
+Private Function EsIdentificador(ByVal s As String) As Boolean
+    Dim i As Long, c As String
+    If Len(s) = 0 Then Exit Function
+    For i = 1 To Len(s)
+        c = UCase$(Mid$(s, i, 1))
+        If Not ((c >= "A" And c <= "Z") Or c = "_" Or (i > 1 And c >= "0" And c <= "9")) Then Exit Function
+    Next i
+    EsIdentificador = True
+End Function
+
+Private Sub Falla(ByVal fila As Long, ByVal msg As String)
+    mErrorFila = fila
+    mError = msg
+End Sub
+
+' =====================================================================
+'  EJEMPLOS  (hoja oculta _Ejemplos: A nombre | B linea)
+' =====================================================================
+Public Sub EjemploCargar(ByVal nombre As String)
+    Dim ws As Worksheet, r As Long, ultima As Long, k As Long, cod As Range
+    Set ws = Hoja(HOJA_EJEMPLOS)
+    Set cod = Sim().Range("EDITOR_COD")
+    Application.EnableEvents = False
+    cod.ClearContents
+    cod.Interior.color = RGB(255, 255, 255)
+    Sim().Range("EDITOR_DIR").ClearContents
+    Sim().Range("EDITOR_HEX").ClearContents
+    ultima = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    k = 0
+    For r = 2 To ultima
+        If CStr(ws.Cells(r, 1).Value) = nombre Then
+            k = k + 1
+            If k > N_LINEAS Then Exit For
+            cod.Cells(k, 1).Value = "'" & CStr(ws.Cells(r, 2).Value)
+        End If
+    Next r
+    Application.EnableEvents = True
+    EditorColorearTodo
+End Sub
+
+
+
+
+=== MODULO: ModInterfaz.bas ===
+Attribute VB_Name = "ModInterfaz"
+Option Explicit
+
+' =====================================================================
+'  ModInterfaz - controles de la hoja Simulador.
+'
+'    LOAD        ensambla el programa del editor y lo carga en memoria
+'    STEP        avanza UNA micro-operacion (un pulso de reloj)
+'    STEP INSTR  avanza hasta terminar la instruccion en curso
+'    RUN         ejecucion continua; la velocidad la marca el deslizador
+'    PAUSE       detiene RUN al terminar la micro-operacion en curso
+'    RESET       registros y PC a cero (la memoria se conserva)
+'
+'  Todos los puntos de entrada atrapan sus errores: un error sin manejar
+'  abriria el depurador y dejaria la hoja bloqueada.
+' =====================================================================
+
+Private Const MAX_MICRO_RUN As Long = 20000
+
+' =====================================================================
+'  BOTONES
+' =====================================================================
+Public Sub Btn_Load()
+    On Error GoTo fallo
+    If Ocupado() Then Exit Sub
+    Application.ScreenUpdating = False
+    CpuReset
+    LogLimpiar
+    Ensamblar
+    VistaInicial
+    Application.ScreenUpdating = True
+    Exit Sub
+fallo:
+    ErrorInterno "LOAD"
+End Sub
+
+Public Sub Btn_Step()
+    On Error GoTo fallo
+    If Ocupado() Then Exit Sub
+    MicroPaso
+    Exit Sub
+fallo:
+    ErrorInterno "STEP"
+End Sub
+
+Public Sub Btn_StepInstr()
+    On Error GoTo fallo
+    If Ocupado() Then Exit Sub
+    CpuSet R_CORRIENDO, 1
+    CpuSet R_PAUSA, 0
+    Do
+        If Not MicroPaso() Then Exit Do
+        If EnFrontera() Then Exit Do
+        If CpuNum(R_PAUSA) = 1 Then Exit Do
+        EsperaEntreMicros
+    Loop
+    CpuSet R_CORRIENDO, 0
+    Exit Sub
+fallo:
+    CpuSet R_CORRIENDO, 0
+    ErrorInterno "STEP INSTR"
+End Sub
+
+Public Sub Btn_Run()
+    Dim n As Long
+    On Error GoTo fallo
+    If CpuNum(R_CORRIENDO) = 1 Then Exit Sub
+    CpuSet R_CORRIENDO, 1
+    CpuSet R_PAUSA, 0
+    Estado t("Ejecutando... (PAUSE para detener)")
+    Do
+        If Not MicroPaso() Then Exit Do
+        n = n + 1
+        If CpuNum(R_HALT) = 1 Then Exit Do
+        If n >= MAX_MICRO_RUN Then
+            Estado t("RUN detenido tras ") & n & t(" ciclos: ~?el programa tiene un bucle infinito?"), True
+            Exit Do
+        End If
+        EsperaEntreMicros
+        If CpuNum(R_PAUSA) = 1 Then
+            Estado t("En pausa. STEP para avanzar paso a paso, RUN para continuar.")
+            Exit Do
+        End If
+    Loop
+    CpuSet R_CORRIENDO, 0
+    Exit Sub
+fallo:
+    CpuSet R_CORRIENDO, 0
+    ErrorInterno "RUN"
+End Sub
+
+Public Sub Btn_Pause()
+    CpuSet R_PAUSA, 1
+End Sub
+
+Public Sub Btn_Reset()
+    On Error GoTo fallo
+    If Ocupado() Then Exit Sub
+    Application.ScreenUpdating = False
+    CpuReset
+    LogLimpiar
+    VistaInicial
+    Application.ScreenUpdating = True
+    Estado t("RESET: registros y PC a cero. La memoria conserva su contenido (LOAD recarga el programa).")
+    Exit Sub
+fallo:
+    ErrorInterno "RESET"
+End Sub
+
+Public Sub Btn_Ejemplo()
+    On Error GoTo fallo
+    If Ocupado() Then Exit Sub
+    EjemploCargar CStr(Sim().Range("EJEMPLO_SEL").Value)
+    Btn_Load
+    Exit Sub
+fallo:
+    ErrorInterno "Cargar ejemplo"
+End Sub
+
+' Al mover el deslizador de velocidad
+Public Sub Btn_Velocidad()
+    FijarTexto "LBL_VELOC", "Velocidad " & CpuNum(R_VELOC) & "/10"
+End Sub
+
+' =====================================================================
+'  AUXILIARES
+' =====================================================================
+Private Sub EsperaEntreMicros()
+    If Animando() Then Pausa 0.25 Else Pausa 0.04
+End Sub
+
+' Si RUN esta en marcha, se pide la pausa y se ignora el boton pulsado
+Private Function Ocupado() As Boolean
+    If CpuNum(R_CORRIENDO) = 1 Then
+        CpuSet R_PAUSA, 1
+        Estado t("La CPU estaba en marcha: se ha pausado. Vuelve a pulsar el bot~on.")
+        Ocupado = True
+    End If
+End Function
+
+Private Sub ErrorInterno(ByVal donde As String)
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Estado "Error interno en " & donde & ": " & Err.Description, True
+End Sub
+
+' Deja el diagrama en el estado de "listo para empezar"
+Public Sub VistaInicial()
+    ApagarRutas
+    FaseMostrar ""
+    FijarTexto "SEC_TXT", "READY"
+    Hoja(HOJA_MICRO).Range("A2:F41").ClearContents
+    CpuSet R_NMICRO, 0
+    CpuSet R_MICRO, 0
+    MicroListaMostrar
+    MicroTitulo t("Microprogram (pulsa STEP)")
+    DecodLimpiar
+    CpuSet R_ULTMEM, -1
+    MemPintarTodo
+    MemMarcarPC 0
+    MemVentanaResaltar ""
+    PrimitivaMostrar "", ""
+    EditorResaltar MemFilaEditor(0)
+    CpuPintarTodo
+    RelojMostrar
+    Btn_Velocidad
+    MemInspeccionar 0
+    Narrar t("Listo. STEP ejecuta una micro-operaci~on; STEP INSTR, una instrucci~on completa; RUN, el programa entero. ") & _
+           t("La l~inea amarilla del editor es la instrucci~on que va a ejecutarse.")
+End Sub
+
+' Llamado por el generador al construir el libro
+Public Function Ui_Inicializar() As String
+    On Error GoTo fallo
+    TeoriaEscribirISA
+    EjemploCargar CStr(Sim().Range("EJEMPLO_SEL").Value)
+    CpuReset
+    LogLimpiar
+    Ui_Inicializar = Ensamblar()
+    VistaInicial
+    Exit Function
+fallo:
+    Ui_Inicializar = "ERR " & Err.Number & ": " & Err.Description
+End Function
+
+' Tabla de la ISA en la hoja Teoria, generada desde ModISA (una sola fuente)
+Public Sub TeoriaEscribirISA()
+    Dim ws As Worksheet, f As Long, ops As Variant, k As Long, i As TInstr, Flags As String
+    Set ws = ThisWorkbook.Worksheets("Teoria")
+    f = ws.Range("ISA_INICIO").Row
+    ws.Range(ws.Cells(f, 1), ws.Cells(f + 80, 6)).ClearContents
+    ws.Cells(f, 1).Value = "Opcode"
+    ws.Cells(f, 2).Value = t("Instrucci~on")
+    ws.Cells(f, 3).Value = "Bytes"
+    ws.Cells(f, 4).Value = t("Operaci~on (RTL)")
+    ws.Cells(f, 5).Value = "Flags"
+    ws.Cells(f, 6).Value = "Modo"
+    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Font.Bold = True
+    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Interior.color = RGB(31, 56, 100)
+    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Font.color = RGB(255, 255, 255)
+    ops = IsaListaOpcodes()
+    For k = LBound(ops) To UBound(ops)
+        i = IsaInfo(ops(k))
+        Flags = ""
+        If InStr(i.Flags, "Z") > 0 Then Flags = Flags & "ZF "
+        If InStr(i.Flags, "C") > 0 Then Flags = Flags & "CF "
+        If InStr(i.Flags, "S") > 0 Then Flags = Flags & "SF "
+        If InStr(i.Flags, "O") > 0 Then Flags = Flags & "OF "
+        If Flags = "" Then Flags = "-"
+        ws.Cells(f + 1 + k, 1).Value = "'" & HexH(ops(k))
+        ws.Cells(f + 1 + k, 2).Value = IsaFormato(ops(k))
+        ws.Cells(f + 1 + k, 3).Value = i.Bytes
+        ws.Cells(f + 1 + k, 4).Value = t(i.desc)
+        ws.Cells(f + 1 + k, 5).Value = Trim$(Flags)
+        ws.Cells(f + 1 + k, 6).Value = IsaModo(ops(k))
+    Next k
+End Sub
+
+' =====================================================================
+'  API DE PRUEBAS (la usan los scripts de verificacion, sin interfaz)
+' =====================================================================
+Public Function Test_Cargar(ByVal ejemplo As String) As String
+    On Error GoTo fallo
+    EjemploCargar ejemplo
+    CpuReset
+    LogLimpiar
+    Test_Cargar = Ensamblar()
+    VistaInicial
+    Exit Function
+fallo:
+    Test_Cargar = "ERR " & Err.Description
+End Function
+
+Public Function Test_Correr(ByVal maxMicro As Long) As String
+    Dim n As Long, animaba As Variant
+    On Error GoTo fallo
+    animaba = CpuGet(R_ANIMAR)
+    CpuSet R_ANIMAR, False
+    Do While n < maxMicro
+        If Not MicroPaso() Then Exit Do
+        n = n + 1
+        If CpuNum(R_HALT) = 1 Then Exit Do
+    Loop
+    CpuSet R_ANIMAR, animaba
+    Test_Correr = IIf(CpuNum(R_HALT) = 1, "HALT", "CORRIENDO") & " micro=" & n & _
+                  " instr=" & CpuNum(R_INSTR) & " PC=" & HexH(CpuNum(R_PC)) & _
+                  " AX=" & CpuNum(R_AX) & " BX=" & CpuNum(R_BX) & " " & TextoFlags()
+    Exit Function
+fallo:
+    CpuSet R_ANIMAR, animaba
+    Test_Correr = "ERR " & Err.Number & " (" & Err.Source & "): " & Err.Description
+End Function
+
+Public Function Test_Mem(ByVal d As Long) As Long
+    Test_Mem = MemRead(d)
+End Function
+
+' Ensambla una sola linea en el editor (para probar errores del ensamblador)
+Public Function Test_Linea(ByVal linea As String) As String
+    Dim cod As Range
+    On Error GoTo fallo
+    Set cod = Sim().Range("EDITOR_COD")
+    Application.EnableEvents = False
+    cod.ClearContents
+    cod.Cells(1, 1).Value = "'" & linea
+    Application.EnableEvents = True
+    Test_Linea = Ensamblar() & " | bytes: " & CStr(Sim().Range("EDITOR_HEX").Cells(1, 1).Value)
+    Exit Function
+fallo:
+    Application.EnableEvents = True
+    Test_Linea = "ERR " & Err.Description
+End Function
+
+' =====================================================================
+'  DOCUMENTACION (la usa build\Exportar-Doc.ps1 para el README)
+' =====================================================================
+' Tabla de la ISA en Markdown, desde ModISA (una sola fuente)
+Public Function Doc_IsaMarkdown() As String
+    Dim ops As Variant, k As Long, i As TInstr, s As String, fl As String
+    s = "| Opcode | Instrucci" & ChrW(243) & "n | Bytes | Operaci" & ChrW(243) & "n | Flags | Modo |" & vbLf & _
+        "|:---:|---|:---:|---|:---:|---|" & vbLf
+    ops = IsaListaOpcodes()
+    For k = LBound(ops) To UBound(ops)
+        i = IsaInfo(ops(k))
+        fl = ""
+        If InStr(i.Flags, "Z") > 0 Then fl = fl & "ZF "
+        If InStr(i.Flags, "C") > 0 Then fl = fl & "CF "
+        If InStr(i.Flags, "S") > 0 Then fl = fl & "SF "
+        If InStr(i.Flags, "O") > 0 Then fl = fl & "OF "
+        If fl = "" Then fl = "-"
+        s = s & "| `" & HexH(ops(k)) & "` | `" & IsaFormato(ops(k)) & "` | " & i.Bytes & " | " & _
+            t(i.desc) & " | " & Trim$(fl) & " | " & IsaModo(ops(k)) & " |" & vbLf
+    Next k
+    Doc_IsaMarkdown = s
+End Function
+
+' Traza instruccion a instruccion de un ejemplo, en Markdown
+Public Function Doc_TrazaMarkdown(ByVal ejemplo As String, ByVal maxInstr As Long) As String
+    Dim s As String, n As Long, pcIni As Long, c0 As Long, animaba As Variant, texto As String
+    Dim op As Long, arg As Long, mem As String, g As String
+    On Error GoTo fallo
+    Test_Cargar ejemplo
+    animaba = CpuGet(R_ANIMAR)
+    CpuSet R_ANIMAR, False
+    s = "| # | Dir | Instrucci" & ChrW(243) & "n | Ciclos | PC | AX | BX | ZF | CF | SF | OF | Efecto |" & vbLf & _
+        "|---:|:---:|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|" & vbLf
+    Do
+        pcIni = CpuNum(R_PC)
+        c0 = CpuNum(R_CICLOS)
+        Do
+            If Not MicroPaso() Then Exit Do
+            If EnFrontera() Then Exit Do
+        Loop
+        n = n + 1
+        op = CpuNum(R_IROP): arg = CpuNum(R_IRARG)
+        texto = IsaTexto(op, arg)
+        g = IsaInfo(op).Grupo
+        Select Case g
+            Case "MEMW": mem = "M[" & HexH(arg) & "] = " & HexH(MemRead(arg))
+            Case "MEMR": mem = IsaInfo(op).Op1 & " = M[" & HexH(arg) & "]"
+            Case "SALTO"
+                If IsaCondicion(op) = "" Then
+                    mem = "salta a " & HexH(arg)
+                ElseIf CpuNum(R_SALTO) = 1 Then
+                    mem = IsaCondicion(op) & ": salta a " & HexH(arg)
+                Else
+                    mem = "no salta"
+                End If
+            Case "CTRL": mem = IIf(IsaInfo(op).Mnem = "HLT", "fin", "-")
+            Case "CMP": mem = "solo flags"
+            Case Else: mem = "-"
+        End Select
+        s = s & "| " & n & " | `" & HexH(pcIni) & "` | `" & texto & "` | " & (CpuNum(R_CICLOS) - c0) & _
+            " | " & HexH(CpuNum(R_PC)) & " | " & CpuNum(R_AX) & " | " & CpuNum(R_BX) & " | " & _
+            CpuNum(R_ZF) & " | " & CpuNum(R_CF) & " | " & CpuNum(R_SF) & " | " & CpuNum(R_OF) & " | " & mem & " |" & vbLf
+        If CpuNum(R_HALT) = 1 Or n >= maxInstr Then Exit Do
+    Loop
+    CpuSet R_ANIMAR, animaba
+    Doc_TrazaMarkdown = s & vbLf & "Total: " & n & " instrucciones, " & CpuNum(R_CICLOS) & " ciclos de reloj."
+    Exit Function
+fallo:
+    CpuSet R_ANIMAR, animaba
+    Doc_TrazaMarkdown = "ERR " & Err.Description
+End Function
+
+' Ejecuta una operacion de la ALU aislada y devuelve resultado + flags
+Public Function Test_Alu(ByVal mn As String, ByVal a As Long, ByVal b As Long) As String
+    Dim r As Long
+    On Error GoTo fallo
+    CpuSet R_ZF, 0: CpuSet R_CF, 0: CpuSet R_SF, 0: CpuSet R_OF, 0
+    r = AluOperar(mn, a, b)
+    Test_Alu = r & " " & TextoFlags()
+    Exit Function
+fallo:
+    Test_Alu = "ERR " & Err.Description
+End Function
+
+
+
+
+=== MODULO: ModISA.bas ===
+Attribute VB_Name = "ModISA"
+Option Explicit
+
+' =====================================================================
+'  ModISA - Conjunto de instrucciones (ISA) de la CPU de 8 bits.
+'
+'  Es la "ROM de decodificacion": para cada opcode dice que instruccion
+'  es, cuantos bytes ocupa, sus operandos y que flags altera. La usan el
+'  Decodificador (fase DECODE), el ensamblador y el desensamblador.
+'
+'  Codificacion sistematica del opcode (1 byte):
+'     nibble alto = operacion      nibble bajo = modo / registros
+'       0 control (HLT, NOP)         x0  AX, imm     (2 bytes)
+'       1 MOV                        x1  BX, imm     (2 bytes)
+'       2 LOAD / STORE               x2  AX, BX      (1 byte)
+'       3 ADD   4 SUB   5 CMP        x3  BX, AX      (1 byte)
+'       6 INC / DEC / NOT
+'       7 AND   8 OR    9 XOR
+'       A saltos (JMP, JZ, JNZ, JC, JNC, JS, JNS)
+'  HLT vale 00h a proposito: una zona de memoria vacia detiene la CPU.
+'
+'  Tipos de operando:  AX | BX | IMM (inmediato) | MEM ([dir]) | DIR (destino de salto)
+' =====================================================================
+
+Public Type TInstr
+    Opcode As Long
+    Mnem As String
+    Op1 As String
+    Op2 As String
+    Bytes As Long
+    Flags As String      ' letras de los flags que altera: Z C S O
+    Grupo As String      ' CTRL | TRANS | MEMR | MEMW | ALU | CMP | UNARIA | SALTO
+    desc As String       ' semantica en notacion RTL (con marcadores de T())
+End Type
+
+Private mTabla(0 To 255) As TInstr
+Private mDefinido(0 To 255) As Boolean
+Private mListo As Boolean
+
+' =====================================================================
+'  DEFINICION DE LA TABLA
+' =====================================================================
+Private Sub Def(ByVal op As Long, ByVal mn As String, ByVal o1 As String, ByVal o2 As String, _
+                ByVal nb As Long, ByVal fl As String, ByVal gr As String, ByVal ds As String)
+    With mTabla(op)
+        .Opcode = op: .Mnem = mn: .Op1 = o1: .Op2 = o2
+        .Bytes = nb: .Flags = fl: .Grupo = gr: .desc = ds
+    End With
+    mDefinido(op) = True
+End Sub
+
+' Las 4 variantes de una operacion de dos operandos (x0..x3)
+Private Sub Def4(ByVal base As Long, ByVal mn As String, ByVal fl As String, _
+                 ByVal gr As String, ByVal simb As String)
+    Def base + 0, mn, "AX", "IMM", 2, fl, gr, "AX <- AX " & simb & " imm"
+    Def base + 1, mn, "BX", "IMM", 2, fl, gr, "BX <- BX " & simb & " imm"
+    Def base + 2, mn, "AX", "BX", 1, fl, gr, "AX <- AX " & simb & " BX"
+    Def base + 3, mn, "BX", "AX", 1, fl, gr, "BX <- BX " & simb & " AX"
+End Sub
+
+Public Sub IsaInit()
+    If mListo Then Exit Sub
+
+    Def &H0, "HLT", "", "", 1, "", "CTRL", "Detiene el reloj (fin del programa)"
+    Def &H1, "NOP", "", "", 1, "", "CTRL", "No opera"
+
+    Def &H10, "MOV", "AX", "IMM", 2, "", "TRANS", "AX <- imm"
+    Def &H11, "MOV", "BX", "IMM", 2, "", "TRANS", "BX <- imm"
+    Def &H12, "MOV", "AX", "BX", 1, "", "TRANS", "AX <- BX"
+    Def &H13, "MOV", "BX", "AX", 1, "", "TRANS", "BX <- AX"
+
+    Def &H20, "LOAD", "AX", "MEM", 2, "", "MEMR", "AX <- M[dir]"
+    Def &H21, "LOAD", "BX", "MEM", 2, "", "MEMR", "BX <- M[dir]"
+    Def &H22, "STORE", "MEM", "AX", 2, "", "MEMW", "M[dir] <- AX"
+    Def &H23, "STORE", "MEM", "BX", 2, "", "MEMW", "M[dir] <- BX"
+
+    Def4 &H30, "ADD", "ZCSO", "ALU", "+"
+    Def4 &H40, "SUB", "ZCSO", "ALU", "-"
+    Def4 &H50, "CMP", "ZCSO", "CMP", "-"
+    ' CMP no guarda el resultado: se reescribe su semantica
+    mTabla(&H50).desc = "flags <- AX - imm": mTabla(&H51).desc = "flags <- BX - imm"
+    mTabla(&H52).desc = "flags <- AX - BX":  mTabla(&H53).desc = "flags <- BX - AX"
+
+    Def &H60, "INC", "AX", "", 1, "ZSO", "UNARIA", "AX <- AX + 1"
+    Def &H61, "INC", "BX", "", 1, "ZSO", "UNARIA", "BX <- BX + 1"
+    Def &H62, "DEC", "AX", "", 1, "ZSO", "UNARIA", "AX <- AX - 1"
+    Def &H63, "DEC", "BX", "", 1, "ZSO", "UNARIA", "BX <- BX - 1"
+    Def &H64, "NOT", "AX", "", 1, "", "UNARIA", "AX <- NOT AX"
+    Def &H65, "NOT", "BX", "", 1, "", "UNARIA", "BX <- NOT BX"
+
+    Def4 &H70, "AND", "ZCSO", "ALU", "AND"
+    Def4 &H80, "OR", "ZCSO", "ALU", "OR"
+    Def4 &H90, "XOR", "ZCSO", "ALU", "XOR"
+
+    Def &HA0, "JMP", "DIR", "", 2, "", "SALTO", "PC <- dir"
+    Def &HA1, "JZ", "DIR", "", 2, "", "SALTO", "si ZF=1: PC <- dir"
+    Def &HA2, "JNZ", "DIR", "", 2, "", "SALTO", "si ZF=0: PC <- dir"
+    Def &HA3, "JC", "DIR", "", 2, "", "SALTO", "si CF=1: PC <- dir"
+    Def &HA4, "JNC", "DIR", "", 2, "", "SALTO", "si CF=0: PC <- dir"
+    Def &HA5, "JS", "DIR", "", 2, "", "SALTO", "si SF=1: PC <- dir"
+    Def &HA6, "JNS", "DIR", "", 2, "", "SALTO", "si SF=0: PC <- dir"
+
+    mListo = True
+End Sub
+
+' =====================================================================
+'  CONSULTAS
+' =====================================================================
+Public Function IsaExiste(ByVal op As Long) As Boolean
+    IsaInit
+    If op < 0 Or op > 255 Then IsaExiste = False Else IsaExiste = mDefinido(op)
+End Function
+
+Public Function IsaInfo(ByVal op As Long) As TInstr
+    IsaInit
+    IsaInfo = mTabla(op And &HFF)
+End Function
+
+' Opcode para una mnemonica y tipos de operando; -1 si no existe
+Public Function IsaBuscar(ByVal mn As String, ByVal t1 As String, ByVal t2 As String) As Long
+    Dim op As Long
+    IsaInit
+    For op = 0 To 255
+        If mDefinido(op) Then
+            With mTabla(op)
+                If .Mnem = mn And .Op1 = t1 And .Op2 = t2 Then IsaBuscar = op: Exit Function
+            End With
+        End If
+    Next op
+    IsaBuscar = -1
+End Function
+
+' Grupo al que pertenece una mnemonica (lo usa el coloreado del editor)
+Public Function IsaGrupoDeMnemonica(ByVal mn As String) As String
+    Dim op As Long
+    IsaInit
+    For op = 0 To 255
+        If mDefinido(op) Then
+            If mTabla(op).Mnem = mn Then IsaGrupoDeMnemonica = mTabla(op).Grupo: Exit Function
+        End If
+    Next op
+    IsaGrupoDeMnemonica = ""
+End Function
+
+Public Function IsaEsMnemonica(ByVal mn As String) As Boolean
+    Dim op As Long
+    IsaInit
+    For op = 0 To 255
+        If mDefinido(op) Then
+            If mTabla(op).Mnem = mn Then IsaEsMnemonica = True: Exit Function
+        End If
+    Next op
+    IsaEsMnemonica = False
+End Function
+
+' Texto de un operando para el desensamblado
+Private Function TextoOperando(ByVal tipo As String, ByVal arg As Long) As String
+    Select Case tipo
+        Case "AX", "BX": TextoOperando = tipo
+        Case "IMM": TextoOperando = HexH(arg)
+        Case "MEM": TextoOperando = "[" & HexH(arg) & "]"
+        Case "DIR": TextoOperando = HexH(arg)
+        Case Else: TextoOperando = ""
+    End Select
+End Function
+
+' Desensamblado: "ADD AX, 05h"  "LOAD BX, [80h]"  "JZ 0Ah"
+Public Function IsaTexto(ByVal op As Long, ByVal arg As Long) As String
+    Dim s As String
+    If Not IsaExiste(op) Then IsaTexto = "DB " & HexH(op): Exit Function
+    With mTabla(op)
+        s = .Mnem
+        If Len(.Op1) > 0 Then s = s & " " & TextoOperando(.Op1, arg)
+        If Len(.Op2) > 0 Then s = s & ", " & TextoOperando(.Op2, arg)
+    End With
+    IsaTexto = s
+End Function
+
+' Formato generico: "ADD AX, imm8"
+Public Function IsaFormato(ByVal op As Long) As String
+    Dim s As String
+    If Not IsaExiste(op) Then IsaFormato = "?": Exit Function
+    With mTabla(op)
+        s = .Mnem
+        If Len(.Op1) > 0 Then s = s & " " & NombreTipo(.Op1)
+        If Len(.Op2) > 0 Then s = s & ", " & NombreTipo(.Op2)
+    End With
+    IsaFormato = s
+End Function
+
+Private Function NombreTipo(ByVal tipo As String) As String
+    Select Case tipo
+        Case "IMM": NombreTipo = "imm8"
+        Case "MEM": NombreTipo = "[dir]"
+        Case "DIR": NombreTipo = "dir"
+        Case Else: NombreTipo = tipo
+    End Select
+End Function
+
+' Modo de direccionamiento, para el Decodificador
+Public Function IsaModo(ByVal op As Long) As String
+    If Not IsaExiste(op) Then IsaModo = "?": Exit Function
+    With mTabla(op)
+        If .Op1 = "MEM" Or .Op2 = "MEM" Then
+            IsaModo = "directo (memoria)"
+        ElseIf .Op1 = "DIR" Then
+            IsaModo = "salto directo"
+        ElseIf .Op2 = "IMM" Then
+            IsaModo = "inmediato"
+        ElseIf Len(.Op1) > 0 Then
+            IsaModo = "registro"
+        Else
+            IsaModo = t("impl~icito")
+        End If
+    End With
+End Function
+
+' Condicion de un salto: "" (incondicional), "ZF=1", "CF=0"...
+Public Function IsaCondicion(ByVal op As Long) As String
+    Select Case op
+        Case &HA1: IsaCondicion = "ZF=1"
+        Case &HA2: IsaCondicion = "ZF=0"
+        Case &HA3: IsaCondicion = "CF=1"
+        Case &HA4: IsaCondicion = "CF=0"
+        Case &HA5: IsaCondicion = "SF=1"
+        Case &HA6: IsaCondicion = "SF=0"
+        Case Else: IsaCondicion = ""
+    End Select
+End Function
+
+' Simbolo que se muestra dentro de la ALU (C.OP)
+Public Function IsaSimbolo(ByVal op As Long) As String
+    IsaInit
+    Select Case mTabla(op And &HFF).Mnem
+        Case "ADD": IsaSimbolo = "+"
+        Case "SUB", "CMP": IsaSimbolo = "-"
+        Case "INC": IsaSimbolo = "+1"
+        Case "DEC": IsaSimbolo = "-1"
+        Case Else: IsaSimbolo = mTabla(op And &HFF).Mnem
+    End Select
+End Function
+
+' Numero de opcodes definidos (para la tabla de la hoja Teoria)
+Public Function IsaListaOpcodes() As Variant
+    Dim op As Long, n As Long, r() As Long
+    IsaInit
+    ReDim r(0 To 255)
+    For op = 0 To 255
+        If mDefinido(op) Then r(n) = op: n = n + 1
+    Next op
+    ReDim Preserve r(0 To n - 1)
+    IsaListaOpcodes = r
+End Function
+
+
+
+
+=== MODULO: ModMemoria.bas ===
+Attribute VB_Name = "ModMemoria"
+Option Explicit
+
+' =====================================================================
+'  ModMemoria - Memoria principal: 256 posiciones de 8 bits (00h-FFh).
+'
+'  Almacen: hoja oculta _RAM, fila = direccion + 1
+'     A  valor (0..255)
+'     B  fila del editor de la instruccion/dato que ocupa el byte (0 = libre)
+'     C  tipo de byte: I = inicio de instruccion | O = operando | D = dato
+'
+'  Primitivas del enunciado: Read(address) y Write(address, value).
+'  (En VBA "Write" es una palabra reservada, por eso se llaman
+'  MemRead y MemWrite.)
+'
+'  Segmentacion logica (solo visual):
+'     00h-7Fh  Segmento de CODIGO     80h-FFh  Segmento de DATOS
+' =====================================================================
+
+Public Const SEG_DATOS As Long = &H80
+
+' colores de la matriz
+Private Const C_COD As Long = 16312540       ' DCE8F8 azul: segmento de codigo
+Private Const C_DAT As Long = 15135453       ' DDF2E6 verde menta: segmento de datos
+Private Const C_LEER As Long = 10086143      ' 99E6FF -> amarillo claro (BGR de FFE699)
+Private Const C_ESCR As Long = 11389944      ' ADCBF8 -> salmon (BGR de F8CBAD)
+Private Const C_BASE As Long = 16447220      ' F4F6FA gris azulado: sin acceso todavia
+
+' =====================================================================
+'  PRIMITIVAS
+' =====================================================================
+Public Function MemRead(ByVal direccion As Long) As Long
+    direccion = direccion And &HFF
+    MemRead = CLng(Val(CStr(ThisWorkbook.Worksheets(HOJA_RAM).Cells(direccion + 1, 1).Value))) And &HFF
+End Function
+
+Public Sub MemWrite(ByVal direccion As Long, ByVal valor As Long)
+    direccion = direccion And &HFF
+    ThisWorkbook.Worksheets(HOJA_RAM).Cells(direccion + 1, 1).Value = valor And &HFF
+    MemPintar direccion
+    If Abs(direccion - CpuNum(R_MAR)) <= 4 Then MemVentana CpuNum(R_MAR)
+End Sub
+
+' Metadatos del byte (los fija el ensamblador)
+Public Sub MemMarcarOrigen(ByVal direccion As Long, ByVal filaEditor As Long, ByVal tipo As String)
+    With ThisWorkbook.Worksheets(HOJA_RAM)
+        .Cells(direccion + 1, 2).Value = filaEditor
+        .Cells(direccion + 1, 3).Value = tipo
+    End With
+End Sub
+
+Public Function MemFilaEditor(ByVal direccion As Long) As Long
+    MemFilaEditor = CLng(Val(CStr(ThisWorkbook.Worksheets(HOJA_RAM).Cells((direccion And &HFF) + 1, 2).Value)))
+End Function
+
+Public Function MemTipo(ByVal direccion As Long) As String
+    MemTipo = CStr(ThisWorkbook.Worksheets(HOJA_RAM).Cells((direccion And &HFF) + 1, 3).Value)
+End Function
+
+' Borra toda la memoria (valores y metadatos)
+Public Sub MemReset()
+    With ThisWorkbook.Worksheets(HOJA_RAM)
+        .Range("A1:A256").Value = 0
+        .Range("B1:C256").ClearContents
+    End With
+    CpuSet R_ULTMEM, -1
+    CpuSet R_ULTPC, -1
+    MemPintarTodo
+End Sub
+
+' =====================================================================
+'  MATRIZ 16 x 16 EN LA HOJA
+' =====================================================================
+Public Function MemCelda(ByVal direccion As Long) As Range
+    direccion = direccion And &HFF
+    Set MemCelda = Sim().Range("MEM_GRID").Cells((direccion \ 16) + 1, (direccion Mod 16) + 1)
+End Function
+
+Public Sub MemPintar(ByVal direccion As Long)
+    Dim c As Range, v As Long
+    Application.EnableEvents = False
+    Set c = MemCelda(direccion)
+    v = MemRead(direccion)
+    EscribirTexto c, Hex2(v)
+
+    ' fondo: segmento, o resaltado si es la ultima celda accedida
+    If direccion = CpuNum(R_ULTMEM) Then
+        If CStr(CpuGet(R_ULTMEMT)) = "W" Then c.Interior.color = C_ESCR Else c.Interior.color = C_LEER
+    ElseIf direccion < SEG_DATOS Then
+        c.Interior.color = C_COD
+    Else
+        c.Interior.color = C_DAT
+    End If
+
+    ' texto: los ceros en gris, lo ocupado en negro
+    If v = 0 And MemTipo(direccion) = "" Then
+        c.Font.color = RGB(166, 166, 166): c.Font.Bold = False
+    Else
+        c.Font.color = RGB(0, 0, 0): c.Font.Bold = (MemTipo(direccion) = "I")
+    End If
+
+    ' marco azul grueso en la celda a la que apunta el PC
+    If direccion = CpuNum(R_ULTPC) Then
+        c.BorderAround xlContinuous, xlThick, , RGB(31, 78, 121)
+    Else
+        c.BorderAround xlContinuous, xlThin, , RGB(191, 191, 191)
+    End If
+
+    ' linea divisoria entre el segmento de codigo (00h-7Fh) y el de datos (80h-FFh)
+    If direccion \ 16 = 7 Then
+        With c.Borders(xlEdgeBottom): .LineStyle = xlContinuous: .Weight = xlMedium: .color = RGB(31, 56, 100): End With
+    ElseIf direccion \ 16 = 8 Then
+        With c.Borders(xlEdgeTop): .LineStyle = xlContinuous: .Weight = xlMedium: .color = RGB(31, 56, 100): End With
+    End If
+    Application.EnableEvents = True
+End Sub
+
+Public Sub MemPintarTodo()
+    Dim d As Long
+    Application.ScreenUpdating = False
+    For d = 0 To 255
+        MemPintar d
+    Next d
+    Application.ScreenUpdating = True
+End Sub
+
+' Resalta la celda leida ("R") o escrita ("W") y quita el resalte anterior
+Public Sub MemMarcarAcceso(ByVal direccion As Long, ByVal tipo As String)
+    Dim anterior As Long
+    anterior = CpuNum(R_ULTMEM)
+    CpuSet R_ULTMEM, direccion And &HFF
+    CpuSet R_ULTMEMT, tipo
+    If anterior >= 0 And anterior <> direccion Then MemPintar anterior
+    MemPintar direccion
+End Sub
+
+' Mueve el marco del PC en la matriz
+Public Sub MemMarcarPC(ByVal direccion As Long)
+    Dim anterior As Long
+    anterior = CpuNum(R_ULTPC)
+    CpuSet R_ULTPC, direccion And &HFF
+    If anterior >= 0 And anterior <> direccion Then MemPintar anterior
+    MemPintar direccion
+End Sub
+
+' =====================================================================
+'  PANEL "PRIMITIVAS DE MEMORIA" DEL DIAGRAMA
+'  Muestra la ultima llamada a Read(address) o Write(address, value):
+'  amarillo = lectura, salmon = escritura (los colores de la matriz).
+' =====================================================================
+Public Sub PrimitivaMostrar(ByVal texto As String, ByVal tipo As String)
+    Dim s As Shape
+    Set s = Forma("PRIM_ULT")
+    If s Is Nothing Then Exit Sub
+    If Len(texto) = 0 Then texto = ChrW(8211)
+    s.TextFrame2.TextRange.Text = texto
+    Select Case tipo
+        Case "R": s.Fill.ForeColor.RGB = C_LEER
+        Case "W": s.Fill.ForeColor.RGB = C_ESCR
+        Case Else: s.Fill.ForeColor.RGB = C_BASE
+    End Select
+End Sub
+
+' =====================================================================
+'  VENTANA DE MEMORIA DEL DIAGRAMA (8 filas; la 4a es la celda del MAR)
+' =====================================================================
+Public Sub MemVentana(ByVal centro As Long)
+    Dim i As Long, d As Long
+    For i = 1 To 8
+        d = centro + i - 4
+        If d < 0 Or d > 255 Then
+            FijarTexto "MEMW_D" & i, ""
+            FijarTexto "MEMW_H" & i, ""
+            FijarTexto "MEMW_B" & i, ""
+        Else
+            FijarTexto "MEMW_D" & i, HexH(d)
+            FijarTexto "MEMW_H" & i, Hex2(MemRead(d))
+            FijarTexto "MEMW_B" & i, Bin8(MemRead(d))
+        End If
+    Next i
+End Sub
+
+' Resalta (o no) la fila del MAR en la ventana del diagrama
+Public Sub MemVentanaResaltar(ByVal tipo As String)
+    Dim n As Variant, s As Shape, color As Long
+    Select Case tipo
+        Case "R": color = RGB(255, 230, 153)
+        Case "W": color = RGB(248, 203, 173)
+        Case Else: color = RGB(255, 242, 204)
+    End Select
+    For Each n In Array("MEMW_D4", "MEMW_H4", "MEMW_B4")
+        Set s = Forma(CStr(n))
+        If Not s Is Nothing Then s.Fill.ForeColor.RGB = color
+    Next n
+End Sub
+
+' =====================================================================
+'  INSPECTOR (celda seleccionada de la matriz)
+' =====================================================================
+Public Sub MemInspeccionar(ByVal direccion As Long)
+    Dim v As Long, ws As Worksheet, desc As String, tipo As String, op As Long
+    Set ws = Sim()
+    direccion = direccion And &HFF
+    v = MemRead(direccion)
+    tipo = MemTipo(direccion)
+
+    Select Case tipo
+        Case "I"
+            desc = t("Instrucci~on: ") & IsaTexto(v, MemRead(direccion + 1))
+        Case "O"
+            op = MemRead(direccion - 1)
+            desc = t("Operando de ") & IsaTexto(op, v)
+        Case "D"
+            desc = "Dato (DB)"
+        Case Else
+            If IsaExiste(v) And direccion < SEG_DATOS And v <> 0 Then
+                desc = t("Como instrucci~on ser~ia: ") & IsaTexto(v, MemRead(direccion + 1))
+            ElseIf v = 0 Then
+                desc = t("Libre (00h = HLT si se ejecutara)")
+            Else
+                desc = "Dato"
+            End If
+    End Select
+
+    Application.EnableEvents = False
+    ws.Range("INSP_DIR").Value = "'" & HexH(direccion) & "  (" & direccion & ")  " & _
+                                 IIf(direccion < SEG_DATOS, t("c~odigo"), "datos")
+    ws.Range("INSP_HEX").Value = "'" & HexH(v)
+    ws.Range("INSP_BIN").Value = "'" & Bin8(v) & "b"
+    ws.Range("INSP_DEC").Value = "'" & v & t("   (con signo: ") & ConSigno(v) & ")"
+    ws.Range("INSP_MNEM").Value = desc
+    Application.EnableEvents = True
+End Sub
+
+' Lo que el usuario escribe en una celda de la matriz:
+'   hexadecimal por defecto (0A, 3F, 0x3F, 3Fh) | #123 decimal | 00101010b binario
+'   (el decimal va con prefijo # porque un sufijo "d" chocaria con el digito hex D)
+Public Function MemLeerEntrada(ByVal s As String, ByRef v As Long) As Boolean
+    Dim u As String
+    u = UCase$(Trim$(s))
+    If Len(u) = 0 Then v = 0: MemLeerEntrada = True: Exit Function
+    If Left$(u, 1) = "#" Then
+        MemLeerEntrada = LeerNumero(Mid$(u, 2), v)
+    ElseIf Right$(u, 1) = "B" And Len(u) >= 3 Then
+        MemLeerEntrada = LeerNumero(u, v)
+    ElseIf Right$(u, 1) = "H" Or Left$(u, 2) = "0X" Then
+        MemLeerEntrada = LeerNumero(u, v)
+    Else
+        MemLeerEntrada = LeerNumero(u & "H", v)
+    End If
+    If MemLeerEntrada And v > 255 Then MemLeerEntrada = False
+End Function
+
+' Direccion de una celda de la matriz, o -1 si la celda no es de la matriz
+Public Function MemDireccionDeCelda(ByVal c As Range) As Long
+    Dim g As Range, f As Long, k As Long
+    Set g = Sim().Range("MEM_GRID")
+    If Intersect(c, g) Is Nothing Then MemDireccionDeCelda = -1: Exit Function
+    f = c.Row - g.Row
+    k = c.Column - g.Column
+    MemDireccionDeCelda = f * 16 + k
+End Function
+
+
+
+
+=== MODULO: ModSecuenciador.bas ===
+Attribute VB_Name = "ModSecuenciador"
+Option Explicit
+
+' =====================================================================
+'  ModSecuenciador - la Unidad de Control.
+'
+'  Cada instruccion se descompone en micro-operaciones agrupadas en las
+'  4 fases del ciclo de instruccion:
+'
+'    FETCH    F1 MAR <- PC      F2 MDR <- M[MAR]   F3 IR <- MDR   F4 PC <- PC+1
+'    DECODE   D1 el Decodificador interpreta el opcode
+'             (si la instruccion ocupa 2 bytes, prepara el operando:
+'              D2 MAR <- PC  D3 MDR <- M[MAR]  D4 IR.op <- MDR  D5 PC <- PC+1)
+'    EXECUTE  la ALU opera, se accede a memoria o se evalua el salto
+'    STORE    write-back: resultado al registro destino o a memoria
+'
+'  El microprograma de la instruccion en curso se escribe en la hoja
+'  oculta _Micro (A fase | B codigo | C texto RTL | D accion | E arg1 | F arg2)
+'  y se ejecuta una fila por cada pulso de reloj (STEP).
+'
+'  Acciones:  XFER src dst | MEMREAD | MEMWRITE | INCPC | DECODE
+'             ALU op | CHK cond | JMPIF | HALT | NOTA
+' =====================================================================
+
+Private Const N_MAX_MICRO As Long = 40
+
+' =====================================================================
+'  UN PULSO DE RELOJ = UNA MICRO-OPERACION
+'  Devuelve False si la CPU no puede avanzar (HLT o sin programa).
+' =====================================================================
+Public Function MicroPaso() As Boolean
+    If CpuNum(R_HALT) = 1 Then
+        Estado t("CPU detenida por HLT. Pulsa RESET (o LOAD para recargar el programa)."), False
+        MicroPaso = False: Exit Function
+    End If
+    If CpuNum(R_PROGOK) <> 1 Then
+        Estado t("No hay programa en memoria: escr~ibelo y pulsa LOAD."), True
+        MicroPaso = False: Exit Function
+    End If
+
+    If CpuNum(R_MICRO) < 1 Or CpuNum(R_MICRO) > CpuNum(R_NMICRO) Then IniciarInstruccion
+
+    MicroEjecutar CpuNum(R_MICRO)
+    CpuSet R_CICLOS, CpuNum(R_CICLOS) + 1
+    CpuSet R_MICRO, CpuNum(R_MICRO) + 1
+
+    If CpuNum(R_MICRO) > CpuNum(R_NMICRO) Then
+        CpuSet R_INSTR, CpuNum(R_INSTR) + 1
+        If CpuNum(R_HALT) = 1 Then CpuSet R_FASE, "HALT"
+    End If
+    RelojMostrar
+    MicroPaso = True
+End Function
+
+' True si la proxima micro-operacion es la primera de una instruccion
+Public Function EnFrontera() As Boolean
+    EnFrontera = (CpuNum(R_MICRO) < 1 Or CpuNum(R_MICRO) > CpuNum(R_NMICRO))
+End Function
+
+' =====================================================================
+'  CONSTRUCCION DEL MICROPROGRAMA
+' =====================================================================
+Private Sub LimpiarMicro()
+    Hoja(HOJA_MICRO).Range("A2:F" & (N_MAX_MICRO + 1)).ClearContents
+    CpuSet R_NMICRO, 0
+End Sub
+
+Private Sub AM(ByVal fase As String, ByVal codigo As String, ByVal texto As String, _
+               ByVal accion As String, Optional ByVal a1 As String = "", Optional ByVal a2 As String = "")
+    Dim f As Long
+    f = CpuNum(R_NMICRO) + 2
+    With Hoja(HOJA_MICRO)
+        .Cells(f, 1).Value = fase
+        .Cells(f, 2).Value = codigo
+        .Cells(f, 3).Value = t(texto)
+        .Cells(f, 4).Value = accion
+        .Cells(f, 5).Value = a1
+        .Cells(f, 6).Value = a2
+    End With
+    CpuSet R_NMICRO, CpuNum(R_NMICRO) + 1
+End Sub
+
+Private Sub IniciarInstruccion()
+    Dim pc As Long, fila As Long
+    pc = CpuNum(R_PC)
+    CpuSet R_PCINSTR, pc
+    LimpiarMicro
+    AM "FETCH", "F1", "MAR <- PC", "XFER", "PC", "MAR"
+    AM "FETCH", "F2", "MDR <- M[MAR]", "MEMREAD"
+    AM "FETCH", "F3", "IR <- MDR", "XFER", "MDR", "IROP"
+    AM "FETCH", "F4", "PC <- PC + 1", "INCPC"
+    AM "DECODE", "D1", "Decodificar el opcode del IR", "DECODE"
+    CpuSet R_MICRO, 1
+
+    fila = MemFilaEditor(pc)
+    EditorResaltar fila
+    MemMarcarPC pc
+    DecodLimpiar
+    MicroTitulo t("Microprogram: instrucci~on en ") & HexH(pc)
+    MicroListaMostrar
+End Sub
+
+' Se llama al ejecutar D1: ya se conoce el opcode, se completa el resto
+Private Sub CompletarMicroprograma(ByVal op As Long)
+    Dim i As TInstr, d As String, src As String, cond As String
+    i = IsaInfo(op)
+
+    If i.Bytes = 2 Then
+        AM "DECODE", "D2", "MAR <- PC", "XFER", "PC", "MAR"
+        AM "DECODE", "D3", "MDR <- M[MAR]", "MEMREAD"
+        AM "DECODE", "D4", "IR.op <- MDR", "XFER", "MDR", "IRARG"
+        AM "DECODE", "D5", "PC <- PC + 1", "INCPC"
+    End If
+
+    If i.Op2 = "IMM" Then src = "IRARG" Else src = i.Op2
+    d = i.Op1
+
+    Select Case i.Grupo
+        Case "CTRL"
+            If i.Mnem = "HLT" Then
+                ' HLT para el reloj en EXECUTE: no hay fase STORE detras
+                AM "EXECUTE", "E1", "Detener el reloj", "HALT"
+            Else
+                AM "EXECUTE", "E1", "NOP: no hay operaci~on", "NOTA"
+                AM "STORE", "S1", "Sin escritura", "NOTA"
+            End If
+
+        Case "TRANS"
+            AM "EXECUTE", "E1", "MOV no usa la ALU: los flags no cambian", "NOTA"
+            AM "STORE", "S1", d & " <- " & nombre(src), "XFER", src, d
+
+        Case "MEMR"            ' LOAD reg, [dir]
+            AM "EXECUTE", "E1", "MAR <- IR.op", "XFER", "IRARG", "MAR"
+            AM "EXECUTE", "E2", "MDR <- M[MAR]", "MEMREAD"
+            AM "STORE", "S1", d & " <- MDR", "XFER", "MDR", d
+
+        Case "MEMW"            ' STORE [dir], reg
+            AM "EXECUTE", "E1", "MAR <- IR.op", "XFER", "IRARG", "MAR"
+            AM "EXECUTE", "E2", "MDR <- " & i.Op2, "XFER", i.Op2, "MDR"
+            AM "STORE", "S1", "M[MAR] <- MDR", "MEMWRITE"
+
+        Case "ALU", "CMP"
+            AM "EXECUTE", "E1", "TMP1 <- " & d, "XFER", d, "REN1"
+            AM "EXECUTE", "E2", "TMP2 <- " & nombre(src), "XFER", src, "REN2"
+            AM "EXECUTE", "E3", "ALU: TMP1 " & IsaSimbolo(op) & " TMP2, flags", "ALU", i.Mnem
+            If i.Grupo = "CMP" Then
+                AM "STORE", "S1", "CMP descarta el resultado: solo quedan los flags", "NOTA"
+            Else
+                AM "STORE", "S1", d & " <- ALU", "XFER", "ALU", d
+            End If
+
+        Case "UNARIA"          ' INC, DEC, NOT
+            AM "EXECUTE", "E1", "TMP1 <- " & d, "XFER", d, "REN1"
+            If i.Mnem = "NOT" Then
+                AM "EXECUTE", "E2", "ALU: NOT TMP1 (sin flags)", "ALU", "NOT"
+            Else
+                AM "EXECUTE", "E2", "TMP2 <- 1", "XFER", "UNO", "REN2"
+                AM "EXECUTE", "E3", "ALU: TMP1 " & IsaSimbolo(op) & ", flags (CF intacto)", "ALU", i.Mnem
+            End If
+            AM "STORE", "S1", d & " <- ALU", "XFER", "ALU", d
+
+        Case "SALTO"
+            cond = IsaCondicion(op)
+            If Len(cond) = 0 Then
+                AM "EXECUTE", "E1", "PC <- IR.op (salto incondicional)", "XFER", "IRARG", "PC"
+            Else
+                AM "EXECUTE", "E1", "Sequencer consulta " & cond, "CHK", cond
+                AM "EXECUTE", "E2", "Si se cumple: PC <- IR.op", "JMPIF"
+            End If
+            AM "STORE", "S1", "Sin escritura (el PC ya apunta a la siguiente)", "NOTA"
+    End Select
+End Sub
+
+Private Function nombre(ByVal reg As String) As String
+    Select Case reg
+        Case "IRARG": nombre = "IR.op"
+        Case "IROP": nombre = "IR"
+        Case "UNO": nombre = "1"
+        Case "REN1": nombre = "TMP1"
+        Case "REN2": nombre = "TMP2"
+        Case Else: nombre = reg
+    End Select
+End Function
+
+' Componente del bus/diagrama asociado a un registro (para elegir la ruta)
+Private Function Comp(ByVal reg As String) As String
+    Select Case reg
+        Case "IROP", "IRARG": Comp = "IR"
+        Case Else: Comp = reg
+    End Select
+End Function
+
+' =====================================================================
+'  EJECUCION DE UNA MICRO-OPERACION
+' =====================================================================
+Private Sub MicroEjecutar(ByVal k As Long)
+    Dim ws As Worksheet, fase As String, codigo As String, texto As String
+    Dim accion As String, a1 As String, a2 As String
+    Dim v As Long, d As Long, r As Long, op As Long, detalle As String, narr As String
+
+    Set ws = Hoja(HOJA_MICRO)
+    fase = ws.Cells(k + 1, 1).Value
+    codigo = ws.Cells(k + 1, 2).Value
+    texto = ws.Cells(k + 1, 3).Value
+    accion = ws.Cells(k + 1, 4).Value
+    a1 = ws.Cells(k + 1, 5).Value
+    a2 = ws.Cells(k + 1, 6).Value
+
+    CpuSet R_FASE, fase
+    FaseMostrar fase
+    MicroListaResaltar k
+    ApagarRutas
+    MemVentanaResaltar ""
+
+    Select Case accion
+        Case "XFER"
+            If a1 = "ALU" Then v = CpuNum(R_ALU) Else v = RegLeer(a1)
+            Narrar fase & " | " & texto & ": " & ExplicarXfer(codigo, a1, a2, v)
+            Transferir Comp(a1) & ">" & Comp(a2), HexH(v)
+            If a2 = "IROP" Then
+                CpuSet R_IROP, v: RegPintar "IR"
+            ElseIf a2 = "IRARG" Then
+                CpuSet R_IRARG, v: RegPintar "IR"
+            Else
+                RegEscribir a2, v
+            End If
+            If a2 = "PC" Then MemMarcarPC v
+            Destello ChipDe(a2)
+            detalle = nombre(a2) & "=" & Hex0x(v)
+
+        Case "MEMREAD"
+            d = CpuNum(R_MAR)
+            v = MemRead(d)
+            PrimitivaMostrar "Read(" & HexH(d) & t(") -> ") & HexH(v), "R"
+            Narrar fase & " | " & texto & ": Read(" & HexH(d) & t("). El Selector localiza la celda ") & HexH(d) & _
+                   t(" y su contenido (") & HexH(v) & t(") llega al MDR por el bus de datos.")
+            Transferir "MAR>SEL", HexH(d)
+            RegEscribir "SEL", d
+            Transferir "SEL>MEM", HexH(d)
+            MemMarcarAcceso d, "R"
+            MemVentanaResaltar "R"
+            Transferir "MEM>MDR", HexH(v)
+            RegEscribir "MDR", v
+            Destello "VAL_MDR"
+            detalle = "MAR=" & Hex0x(d) & ", MDR=" & Hex0x(v) & "  Read(" & Hex0x(d) & ")"
+
+        Case "MEMWRITE"
+            d = CpuNum(R_MAR)
+            v = CpuNum(R_MDR)
+            Narrar fase & " | " & texto & ": Write(" & HexH(d) & ", " & HexH(v) & t("). El dato del MDR se escribe en la celda ") & _
+                   HexH(d) & "."
+            Transferir "MAR>SEL", HexH(d)
+            RegEscribir "SEL", d
+            Transferir "SEL>MEM", HexH(d)
+            Transferir "MDR>MEM", HexH(v)
+            MemWrite d, v
+            PrimitivaMostrar "Write(" & HexH(d) & ", " & HexH(v) & ")", "W"
+            MemMarcarAcceso d, "W"
+            MemVentanaResaltar "W"
+            detalle = "RAM[" & Hex0x(d) & "] <- " & Hex0x(v) & "  Write(" & Hex0x(d) & ", " & Hex0x(v) & ")"
+
+        Case "INCPC"
+            v = (CpuNum(R_PC) + 1) And &HFF
+            Narrar fase & " | " & texto & t(": el PC se incrementa y apunta a ") & HexH(v) & "."
+            Transferir "PC+1", HexH(v)
+            RegEscribir "PC", v
+            MemMarcarPC v
+            Destello "VAL_PC"
+            detalle = "PC=" & Hex0x(v)
+
+        Case "DECODE"
+            op = CpuNum(R_IROP)
+            Transferir "IR>DEC", HexH(op)
+            DecodMostrar op
+            If Not IsaExiste(op) Then
+                Narrar fase & " | Opcode " & HexH(op) & t(" desconocido: la CPU se detiene.")
+                CpuSet R_HALT, 1
+                Estado t("Opcode inv~alido ") & HexH(op) & " en " & HexH(CpuNum(R_PCINSTR)) & t(". ~?Se est~a ejecutando un dato?"), True
+                detalle = "opcode invalido " & Hex0x(op)
+            Else
+                ' el Decodificador comunica al Secuenciador QUE operacion
+                ' hay que secuenciar: el dato que viaja es la mnemonica
+                Transferir "DEC>SEC", IsaInfo(op).Mnem
+                CompletarMicroprograma op
+                MicroListaMostrar
+                MicroListaResaltar k
+                MicroTitulo "Microprogram: " & IsaFormato(op)
+                Narrar fase & " | " & t("El Decoder interpreta el opcode ") & HexH(op) & ": " & _
+                       IsaFormato(op) & " (" & IsaInfo(op).Bytes & t(" byte(s), modo ") & IsaModo(op) & _
+                       t(") y avisa al Sequencer, que prepara las control signals.")
+                detalle = "IR=" & Hex0x(op) & " -> " & IsaFormato(op)
+            End If
+
+        Case "ALU"
+            EncenderRuta "REN1>ALU"
+            If a1 <> "NOT" Then EncenderRuta "REN2>ALU"      ' NOT es unaria: solo usa REN1
+            Pausa 0.1
+            v = CpuNum(R_REN1)
+            r = AluOperar(a1, v, CpuNum(R_REN2))
+            ChipAlu IsaSimbolo(CpuNum(R_IROP))
+            Transferir "ALU>FLG", TextoFlagsCorto()
+            Narrar fase & " | " & texto & ": " & ExplicarAlu(a1, v, CpuNum(R_REN2), r)
+            detalle = "ALU=" & Hex0x(r) & "  " & TextoFlags()
+
+        Case "CHK"
+            CpuSet R_SALTO, IIf(CondicionCumple(a1), 1, 0)
+            Transferir "FLG>SEC", a1
+            Narrar fase & " | " & t("El Sequencer consulta el flag ") & Left$(a1, 2) & "=" & _
+                   IIf(FlagLeer(Left$(a1, 2)), 1, 0) & t(": la condici~on ") & a1 & _
+                   IIf(CpuNum(R_SALTO) = 1, t(" SE CUMPLE, se tomar~a el salto."), t(" NO se cumple, no se salta."))
+            detalle = a1 & " -> " & IIf(CpuNum(R_SALTO) = 1, "salta", "no salta")
+
+        Case "JMPIF"
+            If CpuNum(R_SALTO) = 1 Then
+                v = CpuNum(R_IRARG)
+                Narrar fase & " | " & t("Salto tomado: PC <- IR.op = ") & HexH(v) & "."
+                Transferir "IR>PC", HexH(v)
+                RegEscribir "PC", v
+                MemMarcarPC v
+                Destello "VAL_PC"
+                detalle = "PC=" & Hex0x(v) & " (salto)"
+            Else
+                Narrar fase & " | " & t("No se salta: el PC sigue en ") & HexH(CpuNum(R_PC)) & "."
+                detalle = "sin salto"
+            End If
+
+        Case "HALT"
+            CpuSet R_HALT, 1
+            Narrar fase & " | " & t("HLT: el reloj se detiene. Fin del programa.")
+            Estado t("Programa terminado (HLT) tras ") & (CpuNum(R_INSTR) + 1) & t(" instrucciones y ") & _
+                   (CpuNum(R_CICLOS) + 1) & " ciclos."
+            detalle = "reloj detenido"
+
+        Case "NOTA"
+            Narrar fase & " | " & texto & "."
+            detalle = "-"
+    End Select
+
+    LogAgregar fase, codigo, texto, detalle
+End Sub
+
+Private Function TextoFlagsCorto() As String
+    TextoFlagsCorto = CpuNum(R_ZF) & CpuNum(R_CF) & CpuNum(R_SF) & CpuNum(R_OF)
+End Function
+
+Private Function ExplicarXfer(ByVal cod As String, ByVal src As String, ByVal dst As String, ByVal v As Long) As String
+    Select Case True
+        Case cod = "F1"
+            ExplicarXfer = t("la direcci~on de la siguiente instrucci~on (") & HexH(v) & t(") sale por el address bus.")
+        Case cod = "F3"
+            ExplicarXfer = t("el opcode (") & HexH(v) & t(") pasa del MDR al IR (Instruction Register).")
+        Case cod = "D2"
+            ExplicarXfer = t("la instrucci~on ocupa 2 bytes, as~i que se busca tambi~en su operando en ") & HexH(v) & "."
+        Case cod = "D4"
+            ExplicarXfer = t("el operando (") & HexH(v) & t(") se guarda en la segunda mitad del IR.")
+        Case dst = "MAR"
+            ExplicarXfer = t("la direcci~on del operando (") & HexH(v) & t(") pasa al MAR.")
+        Case src = "IRARG" And (dst = "AX" Or dst = "BX")
+            ExplicarXfer = t("el dato inmediato ") & HexH(v) & " (" & v & t(") del IR se copia en ") & dst & _
+                           t(" por el internal data bus, sin pasar por la ALU.")
+        Case (src = "AX" Or src = "BX") And (dst = "AX" Or dst = "BX")
+            ExplicarXfer = t("el contenido de ") & src & " (" & HexH(v) & t(") se copia en ") & dst & "."
+        Case dst = "REN1" Or dst = "REN2"
+            ExplicarXfer = t("el valor ") & HexH(v) & " (" & v & t(") entra en ") & nombre(dst) & t(" de la ALU.")
+        Case src = "ALU"
+            ExplicarXfer = t("write-back: el resultado ") & HexH(v) & " (" & v & t(") se guarda en ") & dst & "."
+        Case src = "MDR"
+            ExplicarXfer = t("write-back: el dato le~ido (") & HexH(v) & t(") se guarda en ") & dst & "."
+        Case dst = "MDR"
+            ExplicarXfer = t("el dato de ") & src & " (" & HexH(v) & t(") pasa al MDR para escribirse en memoria.")
+        Case dst = "PC"
+            ExplicarXfer = t("salto incondicional: el PC pasa a ") & HexH(v) & "."
+        Case Else
+            ExplicarXfer = t("el valor ") & HexH(v) & t(" pasa de ") & nombre(src) & " a " & dst & "."
+    End Select
+End Function
+
+Private Function ExplicarAlu(ByVal mn As String, ByVal a As Long, ByVal b As Long, ByVal r As Long) As String
+    Dim s As String
+    Select Case mn
+        Case "NOT": s = "NOT " & HexH(a) & " = " & HexH(r)
+        Case "INC": s = HexH(a) & " + 1 = " & HexH(r)
+        Case "DEC": s = HexH(a) & " - 1 = " & HexH(r)
+        Case "ADD": s = HexH(a) & " + " & HexH(b) & " = " & HexH(r) & " (" & a & " + " & b & " = " & r & IIf(a + b > 255, t(", con acarreo"), "") & ")"
+        Case "SUB", "CMP": s = HexH(a) & " - " & HexH(b) & " = " & HexH(r) & " (" & a & " - " & b & t(" = ") & ConSigno(r) & ")"
+        Case Else: s = HexH(a) & " " & mn & " " & HexH(b) & " = " & HexH(r)
+    End Select
+    ExplicarAlu = s & ". Flags: " & TextoFlags() & "."
+End Function
+
+' =====================================================================
+'  LOG DE MICRO-OPERACIONES (hoja Log)
+'  A # | B instr | C fase | D micro | E operacion | F detalle |
+'  G..L PC IR MAR MDR AX BX | M..P ZF CF SF OF | Q linea formateada
+' =====================================================================
+Public Sub LogAgregar(ByVal fase As String, ByVal codigo As String, ByVal texto As String, ByVal detalle As String)
+    Dim ws As Worksheet, n As Long, f As Long, linea As String, fila(1 To 17) As Variant
+    Set ws = Hoja(HOJA_LOG)
+    n = CpuNum(R_LOGN) + 1
+    CpuSet R_LOGN, n
+    f = n + 1
+    linea = "[" & Format$(n, "0000") & "] " & fase & " " & codigo & "  " & texto & "   " & detalle
+    fila(1) = n: fila(2) = CpuNum(R_INSTR) + 1: fila(3) = fase: fila(4) = codigo
+    fila(5) = texto: fila(6) = detalle
+    ' con el prefijo 0x (el formato del enunciado) Excel ya no lo toma por
+    ' un numero guardado como texto
+    fila(7) = Hex0x(CpuNum(R_PC)): fila(8) = "'" & TextoIR()
+    fila(9) = Hex0x(CpuNum(R_MAR)): fila(10) = Hex0x(CpuNum(R_MDR))
+    fila(11) = Hex0x(CpuNum(R_AX)): fila(12) = Hex0x(CpuNum(R_BX))
+    fila(13) = CpuNum(R_ZF): fila(14) = CpuNum(R_CF): fila(15) = CpuNum(R_SF): fila(16) = CpuNum(R_OF)
+    fila(17) = linea
+    ws.Range(ws.Cells(f, 1), ws.Cells(f, 17)).Value = fila
+    ' el IR ("10 00") si parece un numero en configuraciones regionales que
+    ' separan los miles con espacio: se marca el aviso como ignorado
+    On Error Resume Next
+    ws.Cells(f, 8).Errors.Item(xlNumberAsText).Ignore = True
+    On Error GoTo 0
+End Sub
+
+Public Sub LogLimpiar()
+    With Hoja(HOJA_LOG)
+        .Range("A2:Q" & .Rows.Count).ClearContents
+    End With
+    CpuSet R_LOGN, 0
+End Sub
+
+
+
+
+=== MODULO: ModUtil.bas ===
+Attribute VB_Name = "ModUtil"
+Option Explicit
+
+' =====================================================================
+'  ModUtil - utilidades compartidas: formatos numericos, tiempos,
+'  acceso a hojas y textos.
+'
+'  REGLA DEL PROYECTO: todas las declaraciones de nivel de modulo van
+'  arriba, antes del primer procedimiento. VBA no reconoce una Const que
+'  quede entre dos procedimientos y rompe la compilacion entera.
+'
+'  El codigo fuente se mantiene en ASCII: al importar, VBA convierte el
+'  texto a la pagina de codigos ANSI y caracteres como la flecha se
+'  pierden. Para los textos que se muestran se usa T(), que traduce
+'  marcadores: ~a ~e ~i ~o ~u ~n -> vocales con tilde y enie,
+'  "<-" -> flecha izquierda, "->" -> flecha derecha.
+' =====================================================================
+
+Public Const HOJA_SIM As String = "Simulador"
+Public Const HOJA_LOG As String = "Log"
+Public Const HOJA_CPU As String = "_CPU"
+Public Const HOJA_RAM As String = "_RAM"
+Public Const HOJA_MICRO As String = "_Micro"
+Public Const HOJA_RUTAS As String = "_Rutas"
+Public Const HOJA_ARISTAS As String = "_Aristas"
+Public Const HOJA_EJEMPLOS As String = "_Ejemplos"
+
+' Traza de depuracion a traza_vba.log (junto al libro). Apagada normalmente.
+Public Const DEPURAR As Boolean = False
+
+' =====================================================================
+'  TEXTOS
+' =====================================================================
+Public Function t(ByVal s As String) As String
+    s = Replace(s, "~a", ChrW(225))
+    s = Replace(s, "~e", ChrW(233))
+    s = Replace(s, "~i", ChrW(237))
+    s = Replace(s, "~o", ChrW(243))
+    s = Replace(s, "~u", ChrW(250))
+    s = Replace(s, "~n", ChrW(241))
+    s = Replace(s, "~N", ChrW(209))
+    s = Replace(s, "~?", ChrW(191))
+    s = Replace(s, "~!", ChrW(161))
+    s = Replace(s, "<-", ChrW(8592))
+    s = Replace(s, "->", ChrW(8594))
+    t = s
+End Function
+
+' =====================================================================
+'  FORMATOS
+' =====================================================================
+Public Function Hex2(ByVal v As Long) As String
+    Hex2 = Right$("0" & Hex$(v And &HFF), 2)
+End Function
+
+' "0Ah"
+Public Function HexH(ByVal v As Long) As String
+    HexH = Hex2(v) & "h"
+End Function
+
+' "0x0A" (formato del log, como en el enunciado)
+Public Function Hex0x(ByVal v As Long) As String
+    Hex0x = "0x" & Hex2(v)
+End Function
+
+Public Function Bin8(ByVal v As Long) As String
+    Dim i As Long, s As String
+    v = v And &HFF
+    For i = 7 To 0 Step -1
+        If (v And (2 ^ i)) <> 0 Then s = s & "1" Else s = s & "0"
+    Next i
+    Bin8 = s
+End Function
+
+' Valor con signo en complemento a 2 (8 bits)
+Public Function ConSigno(ByVal v As Long) As Long
+    v = v And &HFF
+    If v >= 128 Then ConSigno = v - 256 Else ConSigno = v
+End Function
+
+' Interpreta un numero escrito en ensamblador:
+'   decimal 12 | hexadecimal 0Ch, 0x0C | binario 1010b
+' Devuelve True si lo pudo leer; el valor sale en "v".
+Public Function LeerNumero(ByVal s As String, ByRef v As Long) As Boolean
+    Dim i As Long, c As String, base As Long, cuerpo As String, acum As Double
+    s = UCase$(Trim$(s))
+    LeerNumero = False
+    If Len(s) = 0 Then Exit Function
+
+    If Left$(s, 2) = "0X" Then
+        base = 16: cuerpo = Mid$(s, 3)
+    ElseIf Right$(s, 1) = "H" Then
+        base = 16: cuerpo = Left$(s, Len(s) - 1)
+    ElseIf Right$(s, 1) = "B" And Len(s) > 1 And Replace(Replace(Left$(s, Len(s) - 1), "0", ""), "1", "") = "" Then
+        base = 2: cuerpo = Left$(s, Len(s) - 1)
+    Else
+        base = 10: cuerpo = s
+    End If
+    If Len(cuerpo) = 0 Then Exit Function
+
+    acum = 0
+    For i = 1 To Len(cuerpo)
+        c = Mid$(cuerpo, i, 1)
+        Select Case base
+            Case 2
+                If c <> "0" And c <> "1" Then Exit Function
+                acum = acum * 2 + Val(c)
+            Case 10
+                If c < "0" Or c > "9" Then Exit Function
+                acum = acum * 10 + Val(c)
+            Case 16
+                If InStr("0123456789ABCDEF", c) = 0 Then Exit Function
+                acum = acum * 16 + (InStr("0123456789ABCDEF", c) - 1)
+        End Select
+        If acum > 65535 Then Exit Function
+    Next i
+    v = CLng(acum)
+    LeerNumero = True
+End Function
+
+' =====================================================================
+'  HOJAS
+' =====================================================================
+Public Function Hoja(ByVal nombre As String) As Worksheet
+    Set Hoja = ThisWorkbook.Worksheets(nombre)
+End Function
+
+Public Function Sim() As Worksheet
+    Set Sim = ThisWorkbook.Worksheets(HOJA_SIM)
+End Function
+
+Public Function Forma(ByVal nombre As String) As Shape
+    Dim s As Shape
+    On Error Resume Next
+    Set s = Sim().Shapes(nombre)
+    On Error GoTo 0
+    Set Forma = s
+End Function
+
+Public Sub FijarTexto(ByVal nombre As String, ByVal t As String)
+    Dim s As Shape
+    Set s = Forma(nombre)
+    If s Is Nothing Then Exit Sub
+    s.TextFrame2.TextRange.Text = t
+End Sub
+
+' Escribe un texto en una celda sin que Excel lo marque como "numero
+' almacenado como texto" (el triangulito verde). La marca de ignorar el
+' aviso se pierde cada vez que cambia el valor, asi que se repone aqui,
+' justo despues de escribir: ponerla una sola vez al construir el libro
+' no sirve.
+Public Sub EscribirTexto(ByVal c As Range, ByVal texto As String)
+    c.Value = "'" & texto
+    On Error Resume Next
+    c.Errors.Item(xlNumberAsText).Ignore = True
+    On Error GoTo 0
+End Sub
+
+' Mensaje de estado bajo el editor
+Public Sub Estado(ByVal msg As String, Optional ByVal esError As Boolean = False)
+    With Sim().Range("ESTADO")
+        .Value = msg
+        If esError Then .Font.color = RGB(192, 0, 0) Else .Font.color = RGB(31, 56, 100)
+    End With
+End Sub
+
+' =====================================================================
+'  TIEMPO
+' =====================================================================
+' Espera activa con DoEvents: deja pasar clics (PAUSE) mientras anima.
+Public Sub Espera(ByVal segundos As Double)
+    Dim t0 As Double
+    If segundos <= 0 Then DoEvents: Exit Sub
+    t0 = Timer
+    Do
+        DoEvents
+        If Timer < t0 Then Exit Do          ' cruce de medianoche
+    Loop While (Timer - t0) < segundos
+End Sub
+
+Public Sub Traza(ByVal m As String)
+    If Not DEPURAR Then Exit Sub
+    Dim f As Integer
+    On Error Resume Next
+    f = FreeFile
+    Open ThisWorkbook.Path & "\traza_vba.log" For Append As #f
+    Print #f, Format$(Now, "hh:nn:ss") & "  " & m
+    Close #f
+    On Error GoTo 0
+End Sub
+
+

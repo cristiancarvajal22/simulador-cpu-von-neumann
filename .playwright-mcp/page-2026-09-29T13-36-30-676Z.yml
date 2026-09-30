@@ -1,0 +1,863 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Simulador Interactivo de CPU — Arquitectura von Neumann" [level=1] [ref=e3]
+    - generic [ref=e4]: Modelo de Eduardo Alcalde Lancharro
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e8]:
+        - generic [ref=e10]: UNIDAD DE CONTROL (UC)
+        - generic [ref=e12]: UNIDAD ARITMÉTICO LÓGICA (UAL)
+        - generic [ref=e14]: MEMORIA CENTRAL
+        - generic [ref=e16]: Reloj
+        - generic [ref=e19]: Secuenciador
+        - generic [ref=e21]: Microórdenes
+        - generic [ref=e23]: Decodificador
+        - generic [ref=e25]: R.I. [0000]
+        - generic [ref=e27]: C.P. [00]
+        - generic [ref=e29]: "+1"
+        - generic [ref=e31]: Acumulador [0000]
+        - generic [ref=e33]: R. Estado
+        - generic [ref=e35]: REN 1
+        - generic [ref=e37]: REN 2
+        - generic [ref=e39]: C. OP.
+        - generic [ref=e40]: +
+        - generic [ref=e42]: RDM [00]
+        - generic [ref=e43]: (Reg. Direcciones)
+        - generic [ref=e45]: RIM [0000]
+        - generic [ref=e46]: (Reg. Datos)
+        - generic [ref=e48]: Selector
+        - generic [ref=e50]: Dir
+        - generic [ref=e51]: Contenido (Instrucciones / Datos)
+        - generic [ref=e52]: 00h
+        - generic [ref=e53]: ...
+        - generic [ref=e54]: "---"
+        - generic [ref=e55]: "---"
+        - generic [ref=e67]: "1"
+        - generic [ref=e69]: "2"
+        - generic [ref=e71]: "2"
+        - generic [ref=e73]: "3"
+        - generic [ref=e75]: "4"
+        - generic [ref=e77]: "3"
+        - generic [ref=e79]: "6"
+        - generic [ref=e81]: "7"
+        - generic [ref=e83]: "8"
+        - generic [ref=e85]: "10"
+      - generic [ref=e86]:
+        - generic [ref=e87]: PROGRAMA CARGADO
+        - generic [ref=e88]: Presione 'Siguiente Paso'.
+      - generic [ref=e89]:
+        - button "Siguiente Paso" [ref=e90] [cursor=pointer]
+        - button "Ejecutar Automático" [ref=e91] [cursor=pointer]
+        - button "Reiniciar" [ref=e92] [cursor=pointer]
+        - generic [ref=e93]:
+          - generic [ref=e94]: "Velocidad:"
+          - slider "Velocidad:" [ref=e95]: "600"
+        - generic [ref=e96]:
+          - button "Demo 1" [ref=e97] [cursor=pointer]
+          - button "Demo 2" [ref=e98] [cursor=pointer]
+          - button "Demo 3" [ref=e99] [cursor=pointer]
+    - generic [ref=e100]:
+      - generic [ref=e101]:
+        - heading "Registros" [level=2] [ref=e102]
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e105]: C.P.
+            - generic [ref=e106]: "00"
+          - generic [ref=e107]:
+            - generic [ref=e108]: R.I.
+            - generic [ref=e109]: "0000"
+          - generic [ref=e110]:
+            - generic [ref=e111]: Acumulador (AX)
+            - generic [ref=e112]: "0000"
+          - generic [ref=e113]:
+            - generic [ref=e114]: Registro BX
+            - generic [ref=e115]: "0000"
+          - generic [ref=e116]:
+            - generic [ref=e117]: RDM
+            - generic [ref=e118]: "00"
+          - generic [ref=e119]:
+            - generic [ref=e120]: RIM
+            - generic [ref=e121]: "0000"
+          - generic [ref=e122]:
+            - generic [ref=e123]: REN1
+            - generic [ref=e124]: "0000"
+          - generic [ref=e125]:
+            - generic [ref=e126]: REN2
+            - generic [ref=e127]: "0000"
+          - generic [ref=e128]:
+            - generic [ref=e129]: Flags
+            - generic [ref=e130]: "0000"
+      - generic [ref=e131]:
+        - heading "Memoria (256 Bytes)" [level=2] [ref=e132]
+        - generic [ref=e133]:
+          - generic [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]: "00"
+            - text: "01"
+          - generic [ref=e136] [cursor=pointer]:
+            - generic [ref=e137]: "01"
+            - text: "00"
+          - generic [ref=e138] [cursor=pointer]:
+            - generic [ref=e139]: "02"
+            - text: "02"
+          - generic [ref=e140] [cursor=pointer]:
+            - generic [ref=e141]: "03"
+            - text: "05"
+          - generic [ref=e142] [cursor=pointer]:
+            - generic [ref=e143]: "04"
+            - text: "07"
+          - generic [ref=e144] [cursor=pointer]:
+            - generic [ref=e145]: "05"
+            - text: "80"
+          - generic [ref=e146] [cursor=pointer]:
+            - generic [ref=e147]: "06"
+            - text: "01"
+          - generic [ref=e148] [cursor=pointer]:
+            - generic [ref=e149]: "07"
+            - text: "03"
+          - generic [ref=e150] [cursor=pointer]:
+            - generic [ref=e151]: "08"
+            - text: "07"
+          - generic [ref=e152] [cursor=pointer]:
+            - generic [ref=e153]: "09"
+            - text: "81"
+          - generic [ref=e154] [cursor=pointer]:
+            - generic [ref=e155]: 0A
+            - text: "05"
+          - generic [ref=e156] [cursor=pointer]:
+            - generic [ref=e157]: 0B
+            - text: "80"
+          - generic [ref=e158] [cursor=pointer]:
+            - generic [ref=e159]: 0C
+            - text: "11"
+          - generic [ref=e160] [cursor=pointer]:
+            - generic [ref=e161]: 0D
+            - text: "07"
+          - generic [ref=e162] [cursor=pointer]:
+            - generic [ref=e163]: 0E
+            - text: "80"
+          - generic [ref=e164] [cursor=pointer]:
+            - generic [ref=e165]: 0F
+            - text: "05"
+          - generic [ref=e166] [cursor=pointer]:
+            - generic [ref=e167]: "10"
+            - text: "81"
+          - generic [ref=e168] [cursor=pointer]:
+            - generic [ref=e169]: "11"
+            - text: "16"
+          - generic [ref=e170] [cursor=pointer]:
+            - generic [ref=e171]: "12"
+            - text: "07"
+          - generic [ref=e172] [cursor=pointer]:
+            - generic [ref=e173]: "13"
+            - text: "81"
+          - generic [ref=e174] [cursor=pointer]:
+            - generic [ref=e175]: "14"
+            - text: "32"
+          - generic [ref=e176] [cursor=pointer]:
+            - generic [ref=e177]: "15"
+            - text: 0A
+          - generic [ref=e178] [cursor=pointer]:
+            - generic [ref=e179]: "16"
+            - text: "05"
+          - generic [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: "17"
+            - text: "80"
+          - generic [ref=e182] [cursor=pointer]:
+            - generic [ref=e183]: "18"
+            - text: FF
+          - generic [ref=e184] [cursor=pointer]:
+            - generic [ref=e185]: "19"
+            - text: "00"
+          - generic [ref=e186] [cursor=pointer]:
+            - generic [ref=e187]: 1A
+            - text: "00"
+          - generic [ref=e188] [cursor=pointer]:
+            - generic [ref=e189]: 1B
+            - text: "00"
+          - generic [ref=e190] [cursor=pointer]:
+            - generic [ref=e191]: 1C
+            - text: "00"
+          - generic [ref=e192] [cursor=pointer]:
+            - generic [ref=e193]: 1D
+            - text: "00"
+          - generic [ref=e194] [cursor=pointer]:
+            - generic [ref=e195]: 1E
+            - text: "00"
+          - generic [ref=e196] [cursor=pointer]:
+            - generic [ref=e197]: 1F
+            - text: "00"
+          - generic [ref=e198] [cursor=pointer]:
+            - generic [ref=e199]: "20"
+            - text: "00"
+          - generic [ref=e200] [cursor=pointer]:
+            - generic [ref=e201]: "21"
+            - text: "00"
+          - generic [ref=e202] [cursor=pointer]:
+            - generic [ref=e203]: "22"
+            - text: "00"
+          - generic [ref=e204] [cursor=pointer]:
+            - generic [ref=e205]: "23"
+            - text: "00"
+          - generic [ref=e206] [cursor=pointer]:
+            - generic [ref=e207]: "24"
+            - text: "00"
+          - generic [ref=e208] [cursor=pointer]:
+            - generic [ref=e209]: "25"
+            - text: "00"
+          - generic [ref=e210] [cursor=pointer]:
+            - generic [ref=e211]: "26"
+            - text: "00"
+          - generic [ref=e212] [cursor=pointer]:
+            - generic [ref=e213]: "27"
+            - text: "00"
+          - generic [ref=e214] [cursor=pointer]:
+            - generic [ref=e215]: "28"
+            - text: "00"
+          - generic [ref=e216] [cursor=pointer]:
+            - generic [ref=e217]: "29"
+            - text: "00"
+          - generic [ref=e218] [cursor=pointer]:
+            - generic [ref=e219]: 2A
+            - text: "00"
+          - generic [ref=e220] [cursor=pointer]:
+            - generic [ref=e221]: 2B
+            - text: "00"
+          - generic [ref=e222] [cursor=pointer]:
+            - generic [ref=e223]: 2C
+            - text: "00"
+          - generic [ref=e224] [cursor=pointer]:
+            - generic [ref=e225]: 2D
+            - text: "00"
+          - generic [ref=e226] [cursor=pointer]:
+            - generic [ref=e227]: 2E
+            - text: "00"
+          - generic [ref=e228] [cursor=pointer]:
+            - generic [ref=e229]: 2F
+            - text: "00"
+          - generic [ref=e230] [cursor=pointer]:
+            - generic [ref=e231]: "30"
+            - text: "00"
+          - generic [ref=e232] [cursor=pointer]:
+            - generic [ref=e233]: "31"
+            - text: "00"
+          - generic [ref=e234] [cursor=pointer]:
+            - generic [ref=e235]: "32"
+            - text: "00"
+          - generic [ref=e236] [cursor=pointer]:
+            - generic [ref=e237]: "33"
+            - text: "00"
+          - generic [ref=e238] [cursor=pointer]:
+            - generic [ref=e239]: "34"
+            - text: "00"
+          - generic [ref=e240] [cursor=pointer]:
+            - generic [ref=e241]: "35"
+            - text: "00"
+          - generic [ref=e242] [cursor=pointer]:
+            - generic [ref=e243]: "36"
+            - text: "00"
+          - generic [ref=e244] [cursor=pointer]:
+            - generic [ref=e245]: "37"
+            - text: "00"
+          - generic [ref=e246] [cursor=pointer]:
+            - generic [ref=e247]: "38"
+            - text: "00"
+          - generic [ref=e248] [cursor=pointer]:
+            - generic [ref=e249]: "39"
+            - text: "00"
+          - generic [ref=e250] [cursor=pointer]:
+            - generic [ref=e251]: 3A
+            - text: "00"
+          - generic [ref=e252] [cursor=pointer]:
+            - generic [ref=e253]: 3B
+            - text: "00"
+          - generic [ref=e254] [cursor=pointer]:
+            - generic [ref=e255]: 3C
+            - text: "00"
+          - generic [ref=e256] [cursor=pointer]:
+            - generic [ref=e257]: 3D
+            - text: "00"
+          - generic [ref=e258] [cursor=pointer]:
+            - generic [ref=e259]: 3E
+            - text: "00"
+          - generic [ref=e260] [cursor=pointer]:
+            - generic [ref=e261]: 3F
+            - text: "00"
+          - generic [ref=e262] [cursor=pointer]:
+            - generic [ref=e263]: "40"
+            - text: "00"
+          - generic [ref=e264] [cursor=pointer]:
+            - generic [ref=e265]: "41"
+            - text: "00"
+          - generic [ref=e266] [cursor=pointer]:
+            - generic [ref=e267]: "42"
+            - text: "00"
+          - generic [ref=e268] [cursor=pointer]:
+            - generic [ref=e269]: "43"
+            - text: "00"
+          - generic [ref=e270] [cursor=pointer]:
+            - generic [ref=e271]: "44"
+            - text: "00"
+          - generic [ref=e272] [cursor=pointer]:
+            - generic [ref=e273]: "45"
+            - text: "00"
+          - generic [ref=e274] [cursor=pointer]:
+            - generic [ref=e275]: "46"
+            - text: "00"
+          - generic [ref=e276] [cursor=pointer]:
+            - generic [ref=e277]: "47"
+            - text: "00"
+          - generic [ref=e278] [cursor=pointer]:
+            - generic [ref=e279]: "48"
+            - text: "00"
+          - generic [ref=e280] [cursor=pointer]:
+            - generic [ref=e281]: "49"
+            - text: "00"
+          - generic [ref=e282] [cursor=pointer]:
+            - generic [ref=e283]: 4A
+            - text: "00"
+          - generic [ref=e284] [cursor=pointer]:
+            - generic [ref=e285]: 4B
+            - text: "00"
+          - generic [ref=e286] [cursor=pointer]:
+            - generic [ref=e287]: 4C
+            - text: "00"
+          - generic [ref=e288] [cursor=pointer]:
+            - generic [ref=e289]: 4D
+            - text: "00"
+          - generic [ref=e290] [cursor=pointer]:
+            - generic [ref=e291]: 4E
+            - text: "00"
+          - generic [ref=e292] [cursor=pointer]:
+            - generic [ref=e293]: 4F
+            - text: "00"
+          - generic [ref=e294] [cursor=pointer]:
+            - generic [ref=e295]: "50"
+            - text: "00"
+          - generic [ref=e296] [cursor=pointer]:
+            - generic [ref=e297]: "51"
+            - text: "00"
+          - generic [ref=e298] [cursor=pointer]:
+            - generic [ref=e299]: "52"
+            - text: "00"
+          - generic [ref=e300] [cursor=pointer]:
+            - generic [ref=e301]: "53"
+            - text: "00"
+          - generic [ref=e302] [cursor=pointer]:
+            - generic [ref=e303]: "54"
+            - text: "00"
+          - generic [ref=e304] [cursor=pointer]:
+            - generic [ref=e305]: "55"
+            - text: "00"
+          - generic [ref=e306] [cursor=pointer]:
+            - generic [ref=e307]: "56"
+            - text: "00"
+          - generic [ref=e308] [cursor=pointer]:
+            - generic [ref=e309]: "57"
+            - text: "00"
+          - generic [ref=e310] [cursor=pointer]:
+            - generic [ref=e311]: "58"
+            - text: "00"
+          - generic [ref=e312] [cursor=pointer]:
+            - generic [ref=e313]: "59"
+            - text: "00"
+          - generic [ref=e314] [cursor=pointer]:
+            - generic [ref=e315]: 5A
+            - text: "00"
+          - generic [ref=e316] [cursor=pointer]:
+            - generic [ref=e317]: 5B
+            - text: "00"
+          - generic [ref=e318] [cursor=pointer]:
+            - generic [ref=e319]: 5C
+            - text: "00"
+          - generic [ref=e320] [cursor=pointer]:
+            - generic [ref=e321]: 5D
+            - text: "00"
+          - generic [ref=e322] [cursor=pointer]:
+            - generic [ref=e323]: 5E
+            - text: "00"
+          - generic [ref=e324] [cursor=pointer]:
+            - generic [ref=e325]: 5F
+            - text: "00"
+          - generic [ref=e326] [cursor=pointer]:
+            - generic [ref=e327]: "60"
+            - text: "00"
+          - generic [ref=e328] [cursor=pointer]:
+            - generic [ref=e329]: "61"
+            - text: "00"
+          - generic [ref=e330] [cursor=pointer]:
+            - generic [ref=e331]: "62"
+            - text: "00"
+          - generic [ref=e332] [cursor=pointer]:
+            - generic [ref=e333]: "63"
+            - text: "00"
+          - generic [ref=e334] [cursor=pointer]:
+            - generic [ref=e335]: "64"
+            - text: "00"
+          - generic [ref=e336] [cursor=pointer]:
+            - generic [ref=e337]: "65"
+            - text: "00"
+          - generic [ref=e338] [cursor=pointer]:
+            - generic [ref=e339]: "66"
+            - text: "00"
+          - generic [ref=e340] [cursor=pointer]:
+            - generic [ref=e341]: "67"
+            - text: "00"
+          - generic [ref=e342] [cursor=pointer]:
+            - generic [ref=e343]: "68"
+            - text: "00"
+          - generic [ref=e344] [cursor=pointer]:
+            - generic [ref=e345]: "69"
+            - text: "00"
+          - generic [ref=e346] [cursor=pointer]:
+            - generic [ref=e347]: 6A
+            - text: "00"
+          - generic [ref=e348] [cursor=pointer]:
+            - generic [ref=e349]: 6B
+            - text: "00"
+          - generic [ref=e350] [cursor=pointer]:
+            - generic [ref=e351]: 6C
+            - text: "00"
+          - generic [ref=e352] [cursor=pointer]:
+            - generic [ref=e353]: 6D
+            - text: "00"
+          - generic [ref=e354] [cursor=pointer]:
+            - generic [ref=e355]: 6E
+            - text: "00"
+          - generic [ref=e356] [cursor=pointer]:
+            - generic [ref=e357]: 6F
+            - text: "00"
+          - generic [ref=e358] [cursor=pointer]:
+            - generic [ref=e359]: "70"
+            - text: "00"
+          - generic [ref=e360] [cursor=pointer]:
+            - generic [ref=e361]: "71"
+            - text: "00"
+          - generic [ref=e362] [cursor=pointer]:
+            - generic [ref=e363]: "72"
+            - text: "00"
+          - generic [ref=e364] [cursor=pointer]:
+            - generic [ref=e365]: "73"
+            - text: "00"
+          - generic [ref=e366] [cursor=pointer]:
+            - generic [ref=e367]: "74"
+            - text: "00"
+          - generic [ref=e368] [cursor=pointer]:
+            - generic [ref=e369]: "75"
+            - text: "00"
+          - generic [ref=e370] [cursor=pointer]:
+            - generic [ref=e371]: "76"
+            - text: "00"
+          - generic [ref=e372] [cursor=pointer]:
+            - generic [ref=e373]: "77"
+            - text: "00"
+          - generic [ref=e374] [cursor=pointer]:
+            - generic [ref=e375]: "78"
+            - text: "00"
+          - generic [ref=e376] [cursor=pointer]:
+            - generic [ref=e377]: "79"
+            - text: "00"
+          - generic [ref=e378] [cursor=pointer]:
+            - generic [ref=e379]: 7A
+            - text: "00"
+          - generic [ref=e380] [cursor=pointer]:
+            - generic [ref=e381]: 7B
+            - text: "00"
+          - generic [ref=e382] [cursor=pointer]:
+            - generic [ref=e383]: 7C
+            - text: "00"
+          - generic [ref=e384] [cursor=pointer]:
+            - generic [ref=e385]: 7D
+            - text: "00"
+          - generic [ref=e386] [cursor=pointer]:
+            - generic [ref=e387]: 7E
+            - text: "00"
+          - generic [ref=e388] [cursor=pointer]:
+            - generic [ref=e389]: 7F
+            - text: "00"
+          - generic [ref=e390] [cursor=pointer]:
+            - generic [ref=e391]: "80"
+            - text: "00"
+          - generic [ref=e392] [cursor=pointer]:
+            - generic [ref=e393]: "81"
+            - text: "00"
+          - generic [ref=e394] [cursor=pointer]:
+            - generic [ref=e395]: "82"
+            - text: "00"
+          - generic [ref=e396] [cursor=pointer]:
+            - generic [ref=e397]: "83"
+            - text: "00"
+          - generic [ref=e398] [cursor=pointer]:
+            - generic [ref=e399]: "84"
+            - text: "00"
+          - generic [ref=e400] [cursor=pointer]:
+            - generic [ref=e401]: "85"
+            - text: "00"
+          - generic [ref=e402] [cursor=pointer]:
+            - generic [ref=e403]: "86"
+            - text: "00"
+          - generic [ref=e404] [cursor=pointer]:
+            - generic [ref=e405]: "87"
+            - text: "00"
+          - generic [ref=e406] [cursor=pointer]:
+            - generic [ref=e407]: "88"
+            - text: "00"
+          - generic [ref=e408] [cursor=pointer]:
+            - generic [ref=e409]: "89"
+            - text: "00"
+          - generic [ref=e410] [cursor=pointer]:
+            - generic [ref=e411]: 8A
+            - text: "00"
+          - generic [ref=e412] [cursor=pointer]:
+            - generic [ref=e413]: 8B
+            - text: "00"
+          - generic [ref=e414] [cursor=pointer]:
+            - generic [ref=e415]: 8C
+            - text: "00"
+          - generic [ref=e416] [cursor=pointer]:
+            - generic [ref=e417]: 8D
+            - text: "00"
+          - generic [ref=e418] [cursor=pointer]:
+            - generic [ref=e419]: 8E
+            - text: "00"
+          - generic [ref=e420] [cursor=pointer]:
+            - generic [ref=e421]: 8F
+            - text: "00"
+          - generic [ref=e422] [cursor=pointer]:
+            - generic [ref=e423]: "90"
+            - text: "00"
+          - generic [ref=e424] [cursor=pointer]:
+            - generic [ref=e425]: "91"
+            - text: "00"
+          - generic [ref=e426] [cursor=pointer]:
+            - generic [ref=e427]: "92"
+            - text: "00"
+          - generic [ref=e428] [cursor=pointer]:
+            - generic [ref=e429]: "93"
+            - text: "00"
+          - generic [ref=e430] [cursor=pointer]:
+            - generic [ref=e431]: "94"
+            - text: "00"
+          - generic [ref=e432] [cursor=pointer]:
+            - generic [ref=e433]: "95"
+            - text: "00"
+          - generic [ref=e434] [cursor=pointer]:
+            - generic [ref=e435]: "96"
+            - text: "00"
+          - generic [ref=e436] [cursor=pointer]:
+            - generic [ref=e437]: "97"
+            - text: "00"
+          - generic [ref=e438] [cursor=pointer]:
+            - generic [ref=e439]: "98"
+            - text: "00"
+          - generic [ref=e440] [cursor=pointer]:
+            - generic [ref=e441]: "99"
+            - text: "00"
+          - generic [ref=e442] [cursor=pointer]:
+            - generic [ref=e443]: 9A
+            - text: "00"
+          - generic [ref=e444] [cursor=pointer]:
+            - generic [ref=e445]: 9B
+            - text: "00"
+          - generic [ref=e446] [cursor=pointer]:
+            - generic [ref=e447]: 9C
+            - text: "00"
+          - generic [ref=e448] [cursor=pointer]:
+            - generic [ref=e449]: 9D
+            - text: "00"
+          - generic [ref=e450] [cursor=pointer]:
+            - generic [ref=e451]: 9E
+            - text: "00"
+          - generic [ref=e452] [cursor=pointer]:
+            - generic [ref=e453]: 9F
+            - text: "00"
+          - generic [ref=e454] [cursor=pointer]:
+            - generic [ref=e455]: A0
+            - text: "00"
+          - generic [ref=e456] [cursor=pointer]:
+            - generic [ref=e457]: A1
+            - text: "00"
+          - generic [ref=e458] [cursor=pointer]:
+            - generic [ref=e459]: A2
+            - text: "00"
+          - generic [ref=e460] [cursor=pointer]:
+            - generic [ref=e461]: A3
+            - text: "00"
+          - generic [ref=e462] [cursor=pointer]:
+            - generic [ref=e463]: A4
+            - text: "00"
+          - generic [ref=e464] [cursor=pointer]:
+            - generic [ref=e465]: A5
+            - text: "00"
+          - generic [ref=e466] [cursor=pointer]:
+            - generic [ref=e467]: A6
+            - text: "00"
+          - generic [ref=e468] [cursor=pointer]:
+            - generic [ref=e469]: A7
+            - text: "00"
+          - generic [ref=e470] [cursor=pointer]:
+            - generic [ref=e471]: A8
+            - text: "00"
+          - generic [ref=e472] [cursor=pointer]:
+            - generic [ref=e473]: A9
+            - text: "00"
+          - generic [ref=e474] [cursor=pointer]:
+            - generic [ref=e475]: AA
+            - text: "00"
+          - generic [ref=e476] [cursor=pointer]:
+            - generic [ref=e477]: AB
+            - text: "00"
+          - generic [ref=e478] [cursor=pointer]:
+            - generic [ref=e479]: AC
+            - text: "00"
+          - generic [ref=e480] [cursor=pointer]:
+            - generic [ref=e481]: AD
+            - text: "00"
+          - generic [ref=e482] [cursor=pointer]:
+            - generic [ref=e483]: AE
+            - text: "00"
+          - generic [ref=e484] [cursor=pointer]:
+            - generic [ref=e485]: AF
+            - text: "00"
+          - generic [ref=e486] [cursor=pointer]:
+            - generic [ref=e487]: B0
+            - text: "00"
+          - generic [ref=e488] [cursor=pointer]:
+            - generic [ref=e489]: B1
+            - text: "00"
+          - generic [ref=e490] [cursor=pointer]:
+            - generic [ref=e491]: B2
+            - text: "00"
+          - generic [ref=e492] [cursor=pointer]:
+            - generic [ref=e493]: B3
+            - text: "00"
+          - generic [ref=e494] [cursor=pointer]:
+            - generic [ref=e495]: B4
+            - text: "00"
+          - generic [ref=e496] [cursor=pointer]:
+            - generic [ref=e497]: B5
+            - text: "00"
+          - generic [ref=e498] [cursor=pointer]:
+            - generic [ref=e499]: B6
+            - text: "00"
+          - generic [ref=e500] [cursor=pointer]:
+            - generic [ref=e501]: B7
+            - text: "00"
+          - generic [ref=e502] [cursor=pointer]:
+            - generic [ref=e503]: B8
+            - text: "00"
+          - generic [ref=e504] [cursor=pointer]:
+            - generic [ref=e505]: B9
+            - text: "00"
+          - generic [ref=e506] [cursor=pointer]:
+            - generic [ref=e507]: BA
+            - text: "00"
+          - generic [ref=e508] [cursor=pointer]:
+            - generic [ref=e509]: BB
+            - text: "00"
+          - generic [ref=e510] [cursor=pointer]:
+            - generic [ref=e511]: BC
+            - text: "00"
+          - generic [ref=e512] [cursor=pointer]:
+            - generic [ref=e513]: BD
+            - text: "00"
+          - generic [ref=e514] [cursor=pointer]:
+            - generic [ref=e515]: BE
+            - text: "00"
+          - generic [ref=e516] [cursor=pointer]:
+            - generic [ref=e517]: BF
+            - text: "00"
+          - generic [ref=e518] [cursor=pointer]:
+            - generic [ref=e519]: C0
+            - text: "00"
+          - generic [ref=e520] [cursor=pointer]:
+            - generic [ref=e521]: C1
+            - text: "00"
+          - generic [ref=e522] [cursor=pointer]:
+            - generic [ref=e523]: C2
+            - text: "00"
+          - generic [ref=e524] [cursor=pointer]:
+            - generic [ref=e525]: C3
+            - text: "00"
+          - generic [ref=e526] [cursor=pointer]:
+            - generic [ref=e527]: C4
+            - text: "00"
+          - generic [ref=e528] [cursor=pointer]:
+            - generic [ref=e529]: C5
+            - text: "00"
+          - generic [ref=e530] [cursor=pointer]:
+            - generic [ref=e531]: C6
+            - text: "00"
+          - generic [ref=e532] [cursor=pointer]:
+            - generic [ref=e533]: C7
+            - text: "00"
+          - generic [ref=e534] [cursor=pointer]:
+            - generic [ref=e535]: C8
+            - text: "00"
+          - generic [ref=e536] [cursor=pointer]:
+            - generic [ref=e537]: C9
+            - text: "00"
+          - generic [ref=e538] [cursor=pointer]:
+            - generic [ref=e539]: CA
+            - text: "00"
+          - generic [ref=e540] [cursor=pointer]:
+            - generic [ref=e541]: CB
+            - text: "00"
+          - generic [ref=e542] [cursor=pointer]:
+            - generic [ref=e543]: CC
+            - text: "00"
+          - generic [ref=e544] [cursor=pointer]:
+            - generic [ref=e545]: CD
+            - text: "00"
+          - generic [ref=e546] [cursor=pointer]:
+            - generic [ref=e547]: CE
+            - text: "00"
+          - generic [ref=e548] [cursor=pointer]:
+            - generic [ref=e549]: CF
+            - text: "00"
+          - generic [ref=e550] [cursor=pointer]:
+            - generic [ref=e551]: D0
+            - text: "00"
+          - generic [ref=e552] [cursor=pointer]:
+            - generic [ref=e553]: D1
+            - text: "00"
+          - generic [ref=e554] [cursor=pointer]:
+            - generic [ref=e555]: D2
+            - text: "00"
+          - generic [ref=e556] [cursor=pointer]:
+            - generic [ref=e557]: D3
+            - text: "00"
+          - generic [ref=e558] [cursor=pointer]:
+            - generic [ref=e559]: D4
+            - text: "00"
+          - generic [ref=e560] [cursor=pointer]:
+            - generic [ref=e561]: D5
+            - text: "00"
+          - generic [ref=e562] [cursor=pointer]:
+            - generic [ref=e563]: D6
+            - text: "00"
+          - generic [ref=e564] [cursor=pointer]:
+            - generic [ref=e565]: D7
+            - text: "00"
+          - generic [ref=e566] [cursor=pointer]:
+            - generic [ref=e567]: D8
+            - text: "00"
+          - generic [ref=e568] [cursor=pointer]:
+            - generic [ref=e569]: D9
+            - text: "00"
+          - generic [ref=e570] [cursor=pointer]:
+            - generic [ref=e571]: DA
+            - text: "00"
+          - generic [ref=e572] [cursor=pointer]:
+            - generic [ref=e573]: DB
+            - text: "00"
+          - generic [ref=e574] [cursor=pointer]:
+            - generic [ref=e575]: DC
+            - text: "00"
+          - generic [ref=e576] [cursor=pointer]:
+            - generic [ref=e577]: DD
+            - text: "00"
+          - generic [ref=e578] [cursor=pointer]:
+            - generic [ref=e579]: DE
+            - text: "00"
+          - generic [ref=e580] [cursor=pointer]:
+            - generic [ref=e581]: DF
+            - text: "00"
+          - generic [ref=e582] [cursor=pointer]:
+            - generic [ref=e583]: E0
+            - text: "00"
+          - generic [ref=e584] [cursor=pointer]:
+            - generic [ref=e585]: E1
+            - text: "00"
+          - generic [ref=e586] [cursor=pointer]:
+            - generic [ref=e587]: E2
+            - text: "00"
+          - generic [ref=e588] [cursor=pointer]:
+            - generic [ref=e589]: E3
+            - text: "00"
+          - generic [ref=e590] [cursor=pointer]:
+            - generic [ref=e591]: E4
+            - text: "00"
+          - generic [ref=e592] [cursor=pointer]:
+            - generic [ref=e593]: E5
+            - text: "00"
+          - generic [ref=e594] [cursor=pointer]:
+            - generic [ref=e595]: E6
+            - text: "00"
+          - generic [ref=e596] [cursor=pointer]:
+            - generic [ref=e597]: E7
+            - text: "00"
+          - generic [ref=e598] [cursor=pointer]:
+            - generic [ref=e599]: E8
+            - text: "00"
+          - generic [ref=e600] [cursor=pointer]:
+            - generic [ref=e601]: E9
+            - text: "00"
+          - generic [ref=e602] [cursor=pointer]:
+            - generic [ref=e603]: EA
+            - text: "00"
+          - generic [ref=e604] [cursor=pointer]:
+            - generic [ref=e605]: EB
+            - text: "00"
+          - generic [ref=e606] [cursor=pointer]:
+            - generic [ref=e607]: EC
+            - text: "00"
+          - generic [ref=e608] [cursor=pointer]:
+            - generic [ref=e609]: ED
+            - text: "00"
+          - generic [ref=e610] [cursor=pointer]:
+            - generic [ref=e611]: EE
+            - text: "00"
+          - generic [ref=e612] [cursor=pointer]:
+            - generic [ref=e613]: EF
+            - text: "00"
+          - generic [ref=e614] [cursor=pointer]:
+            - generic [ref=e615]: F0
+            - text: "00"
+          - generic [ref=e616] [cursor=pointer]:
+            - generic [ref=e617]: F1
+            - text: "00"
+          - generic [ref=e618] [cursor=pointer]:
+            - generic [ref=e619]: F2
+            - text: "00"
+          - generic [ref=e620] [cursor=pointer]:
+            - generic [ref=e621]: F3
+            - text: "00"
+          - generic [ref=e622] [cursor=pointer]:
+            - generic [ref=e623]: F4
+            - text: "00"
+          - generic [ref=e624] [cursor=pointer]:
+            - generic [ref=e625]: F5
+            - text: "00"
+          - generic [ref=e626] [cursor=pointer]:
+            - generic [ref=e627]: F6
+            - text: "00"
+          - generic [ref=e628] [cursor=pointer]:
+            - generic [ref=e629]: F7
+            - text: "00"
+          - generic [ref=e630] [cursor=pointer]:
+            - generic [ref=e631]: F8
+            - text: "00"
+          - generic [ref=e632] [cursor=pointer]:
+            - generic [ref=e633]: F9
+            - text: "00"
+          - generic [ref=e634] [cursor=pointer]:
+            - generic [ref=e635]: FA
+            - text: "00"
+          - generic [ref=e636] [cursor=pointer]:
+            - generic [ref=e637]: FB
+            - text: "00"
+          - generic [ref=e638] [cursor=pointer]:
+            - generic [ref=e639]: FC
+            - text: "00"
+          - generic [ref=e640] [cursor=pointer]:
+            - generic [ref=e641]: FD
+            - text: "00"
+          - generic [ref=e642] [cursor=pointer]:
+            - generic [ref=e643]: FE
+            - text: "00"
+          - generic [ref=e644] [cursor=pointer]:
+            - generic [ref=e645]: FF
+            - text: "00"
+      - generic [ref=e646]:
+        - heading "Log de Microórdenes" [level=2] [ref=e647]
+        - generic [ref=e648]: "Demo 1: Mult"
