@@ -1,33 +1,32 @@
-﻿# 🛡️ Guía de Preparación para la Defensa Oral (Cheat Sheet)
+# 🛡️ Guía de Preparación para la Defensa Oral (Cheat Sheet)
 
-Esta guía contiene los 3 puntos clave técnicos sobre la implementación en Excel (VBA) para responder con seguridad durante la evaluación en vivo.
+Esta guía contiene los 3 puntos clave técnicos sobre la implementación en Google Apps Script para responder con seguridad durante la evaluación en vivo.
 
 ## 1. Modificación de retardo (Animación) y forzado del C.P.
 
 **Si el docente pide:** *"Modifica el código para que la animación vaya más rápido/lento, o fuerza un salto del Program Counter a la dirección 05h."*
 
-*   **Para alterar el retardo (Sleep):**
-    Debes ir al archivo VBA, módulo `ModAnimacion`, a la función `Pausa(ByVal segundosAlMaximo As Double)`. 
-    Allí se utiliza `Espera segundosAlMaximo / Factor()`. Para hacerlo estático o cambiarlo, puedes modificar la constante `T_MIN_TRAMO` o directamente reemplazar la línea con `Application.Wait (Now + TimeValue("0:00:01"))` para forzar un segundo exacto.
+*   **Para alterar el retardo:**
+    Debes ir al archivo `Code.gs` a la función `ejecutar()`. Allí se utiliza `Utilities.sleep(leerPausa_())`. La función `leerPausa_()` lee el valor directamente de la celda `AQ4` en la hoja `Diagrama` (limitado entre 100 y 2000 ms). Para forzar un retardo de 1 segundo en el código, reemplaza `leerPausa_()` por `1000`: `Utilities.sleep(1000)`.
 *   **Para forzar el C.P.:**
-    En el código (por ejemplo en `ModSecuenciador.bas` durante el Fetch), el C.P. se actualiza con `CpuSet R_PC, nuevo_valor`. Si te piden que el programa salte a la dirección `05h`, puedes inyectar `CpuSet R_PC, 5` justo antes de que termine la fase de Decode, o simplemente editar la celda de valor del C.P. en la hoja si el simulador permite interacción bidireccional.
+    El estado completo de la CPU se guarda en formato JSON en las propiedades del documento (`PropertiesService`). En la función `paso()` o durante el ciclo, si quieres forzar un salto, puedes inyectar `s.r.PC = 5` en el objeto de estado `s` antes de que se llame a `props.setProperty(STATE_KEY, JSON.stringify(s))`. También puedes editar la memoria directamente para poner una instrucción `JMP 05h` (opcode `30 05` en nuestra ISA) y dejar que el ciclo la ejecute.
 
 ## 2. Estructura matemática para actualizar las Banderas (ZF, CF, SF)
 
 **Si el docente pide:** *"Explica cómo calculaste y actualizaste las banderas lógicas en tu ALU."*
 
-En tu módulo de la ALU (Arithmetic Logic Unit), las banderas se actualizan tras cada operación matemática de la siguiente forma (ejemplo para suma en 8 bits):
+En tu función de la ALU (`function alu(op, a, b)` en `Code.gs`), las banderas se actualizan tras cada operación matemática (ejemplo para suma en 8 bits):
 
-*   **ZF (Zero Flag):** Se evalúa matemáticamente como `Si Resultado = 0 Entonces ZF = 1, sino ZF = 0`.
-*   **CF (Carry Flag):** Dado que estamos limitados a 8 bits (0-255), tras sumar operando 1 + operando 2, verificamos si `(Op1 + Op2) > 255`. Si es mayor, hubo desbordamiento y `CF = 1`. Internamente se hace un `Resultado AND &HFF` para truncarlo a 8 bits.
-*   **SF (Sign Flag):** En complemento a 2, el bit más significativo (el bit 7) indica el signo. Se evalúa con una máscara bit a bit: `Si (Resultado AND &H80) <> 0 Entonces SF = 1` (es decir, el bit 7 está en 1).
+*   **ZF (Zero Flag):** Se evalúa matemáticamente con un comparador booleano casteado a número: `ZF: +(result === 0)`.
+*   **CF (Carry Flag):** Tras sumar `n = a + b`, verificamos si `n > 255`. Si es mayor, hubo desbordamiento y se activa la bandera con `CF = +(n > 255)`. El resultado se trunca a 8 bits con `n & 255`. Para restas, la condición es `CF = +(n < 0)`.
+*   **SF (Sign Flag):** En complemento a 2, el bit más significativo (bit 7) indica el signo. Se evalúa aplicando una máscara bit a bit AND de 128 (10000000 en binario): `SF: +((result & 128) !== 0)`.
 
 ## 3. Flujo de datos desde la RAM hasta el RIM (Fase Fetch)
 
 **Si el docente pide:** *"Muéstrame en el código cómo fluye exactamente el dato desde la memoria hasta el registro de datos (RIM) durante el Fetch."*
 
-El flujo interno programado en VBA funciona en tres tiempos durante la **Fase de Búsqueda**:
+El flujo en la función `fetch(s)` y el motor de encolado de micro-operaciones funciona así:
 
-1.  **Activación del MAR (RDM):** El valor del C.P. se asigna a la variable que representa el MAR: `MAR = PC`. Luego se invoca `EncenderRuta("CP_MAR")` para pintar el bus en la UI.
-2.  **Lectura (Selector a Memoria):** Se lee el valor del arreglo/matriz bidimensional de la hoja que representa la memoria usando la dirección contenida en MAR. En VBA esto es algo como `DatoLeido = HojaMemoria.Cells(FilaOffset + MAR, ColumnaBase).Value`.
-3.  **Llegada al MDR (RIM):** Ese valor leído se asigna al registro de datos: `MDR = DatoLeido`. Visualmente, la macro llama a `EncenderRuta("MEM_MDR")` y actualiza la celda/Shape del RIM con el nuevo dato en formato hexadecimal.
+1.  **Activación del MAR (RDM):** El motor encola la transferencia del C.P. al MAR usando `copy(s, 'PC', 'MAR', 'FETCH')`.
+2.  **Lectura (Selector a Memoria):** Se invoca una primitiva de memoria `read(s, a)` que retorna el byte de la matriz interna de RAM: `return s.ram[byte(a)]`. Esta transferencia se encola para el RIM con `copy(s, 'RAM', 'MDR', 'FETCH')`.
+3.  **Llegada al MDR (RIM):** La función `step(s)` procesa esa cola. Cuando procesa el paso `RAM` a `MDR`, lee el valor invocando a `value(s, 'RAM')` (que extrae `s.ram[s.r.MAR]`) y lo asigna a `s.r.MDR`. A nivel visual, `animar_(d, e)` calcula la trayectoria (`cablesDe_('RAM', 'MDR')`) y mueve un cursor visual recorriendo el bus desde la celda correspondiente de memoria hasta el registro `RIM`, animado temporalmente con llamadas a `Utilities.sleep(tiempo)`.

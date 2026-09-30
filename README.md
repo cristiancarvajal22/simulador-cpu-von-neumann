@@ -1,6 +1,6 @@
-﻿# Simulador de CPU 8-bits - Entregable Final
+# Simulador de CPU 8-bits - Entregable Final
 
-Proyecto correspondiente al Parcial 1 de Arquitectura de Computadoras. Este repositorio contiene el entregable final de un simulador de una CPU de 8 bits implementado íntegramente en Excel VBA, con un rediseño personalizado de la interfaz.
+Proyecto correspondiente al Parcial 1 de Arquitectura de Computadoras. Este repositorio contiene el entregable final de un simulador de una CPU de 8 bits implementado íntegramente en Google Sheets mediante Google Apps Script (JavaScript), replicando fielmente el diagrama y funcionamiento de la arquitectura de Von Neumann propuesto por Eduardo Alcalde Lancharro.
 
 ## Arquitectura (Arquitectura de Von Neumann)
 
@@ -54,13 +54,12 @@ graph TD
 
 ## Manual de Usuario Paso a Paso
 
-1.  **Habilitar Macros:** Al abrir el archivo `Simulador_CPU.xlsm`, acepta la habilitación de macros y contenido activo de Excel.
-2.  **Interfaz Inmersiva:** La UI se presenta en modo "Dark Theme". Del lado izquierdo tienes la botonera principal.
-3.  **Cargar Código:** Escribe en la memoria (matriz a la derecha) directamente los valores hexadecimales de tus instrucciones, o usa el botón **CARGAR** para inyectar el programa de prueba predefinido.
-4.  **Ejecución Paso a Paso:** Haz clic en **PASO MICRO** para avanzar una micro-operación a la vez (ej. ver cómo la dirección viaja del PC al MAR). Verás los buses parpadear en naranja.
-5.  **Ejecución Completa:** Haz clic en **EJECUTAR** para que el simulador corra automáticamente a la velocidad marcada por el slider de velocidad.
-6.  **Pausar y Reiniciar:** Puedes detener el ciclo con **PAUSAR** o devolver todos los registros a 00h usando el botón **REINICIAR**.
-7.  **Log de Terminal:** Abajo a la izquierda verás la terminal de estado que narra cronológicamente cada micro-operación efectuada.
+1.  **Preparación de la Hoja:** Al abrir el documento de Google Sheets, el menú personalizado "Simulador CPU" se cargará en la barra superior.
+2.  **Construir Diagrama:** Si es la primera vez, haz clic en `Simulador CPU` -> `Preparar diagrama` para renderizar todos los componentes, registros y buses usando el formato de celdas de la hoja.
+3.  **Cargar Código:** Puedes escribir manualmente en la pestaña `Memoria` o seleccionar `Simulador CPU` -> `Cargar demo: multiplicación` para inyectar el programa de prueba predefinido.
+4.  **Ejecución Paso a Paso:** Haz clic en `Simulador CPU` -> `PASO · una microoperación` para avanzar una micro-operación a la vez. Verás partículas animadas iluminar el bus correspondiente (direcciones en oscuro, datos en claro) y verás la micro-orden actual en la pantalla inferior.
+5.  **Ejecución Completa:** Haz clic en `Simulador CPU` -> `EJECUTAR` para que el simulador corra automáticamente. Puedes cambiar la velocidad modificando la celda de la pausa en la hoja `Diagrama`.
+6.  **Pausar y Reiniciar:** Puedes detener la simulación desde el menú con `PAUSAR` o vaciar el estado conservando la RAM usando `RESET · conservar RAM`.
 
 ## Traza Matemática Iteración por Iteración (Programa de Prueba)
 
@@ -97,7 +96,5 @@ Programa:
 *   **Fin:** 
     *   PC pasa a 16h y ejecuta HLT. El resultado final de `3 * 2 = 6` reposa en la RAM en la dirección `80h`.
 
-## 📦 Estructura del Repositorio y Código Fuente
-Para facilitar la revisión del código sin necesidad de abrir el binario de Excel, todos los módulos VBA del simulador han sido extraídos a la carpeta `src_vba`.
-
-*(Nota de entrega: Todo el código fuente de los módulos y la reestructuración de la interfaz fue finalizado y subido al repositorio como entregable definitivo).*
+## 📦 Código Fuente
+Todo el código lógico, la decodificación de instrucciones y la animación de la interfaz están contenidos en el script `src_gs/Code.gs` desarrollado en JavaScript para el entorno de Google Apps Script.
