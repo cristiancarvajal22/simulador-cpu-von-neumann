@@ -2,19 +2,17 @@ Attribute VB_Name = "ModAnimacion"
 Option Explicit
 
 ' =====================================================================
-'  ModAnimacion - todo lo que se ve moverse en el diagrama.
-'
-'  Cableado = grafo de aristas (formas E_*). Una RUTA es una secuencia
-'  de aristas (hoja oculta _Rutas). Encender una ruta:
-'    - pinta sus aristas de naranja SIN cambiar el grosor,
-'    - las trae al frente (quedan por encima de las grises),
-'    - deja una sola punta de flecha, en el destino.
-'  Al apagarla, cada arista recupera su color y sus puntas de reposo
-'  (hoja oculta _Aristas).
-'
-'  Velocidad: el dato viaja a velocidad CONSTANTE (puntos/segundo), asi
-'  un bus largo y uno corto se recorren al mismo ritmo. El control
-'  deslizante (1..10) escala esa velocidad; 10 es el maximo.
+'  Módulo de Animación
+'  
+'  Aquí controlo la representación gráfica del flujo de datos en la
+'  arquitectura de la CPU. Para mí, el cableado funciona como un grafo
+'  dirigido; cada ruta representa un bus de datos interno que conecta
+'  componentes como el PC, MAR, MDR, etc.
+'  Cuando un dato viaja, el bus se ilumina, indicando el paso de
+'  información (por ejemplo, del MDR al Instruction Register).
+'  
+'  La velocidad a la que viaja la información simula el tiempo de
+'  propagación de señales en el hardware real, y se puede ajustar.
 ' =====================================================================
 
 Private Const COL_ON As Long = 3243501       ' ED7D31 naranja
@@ -23,9 +21,9 @@ Private Const COL_CHIP As Long = 6240798     ' 1E3A5F azul marino (valor actual)
 Private Const VEL_MAX As Double = 900        ' puntos por segundo con el control al maximo
 Private Const T_MIN_TRAMO As Double = 0.12   ' duracion minima de un recorrido (s) al maximo
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  VELOCIDAD
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 ' Factor 0.15 (nivel 1, muy lento) .. 1.0 (nivel 10, maximo)
 Public Function Factor() As Double
     Dim v As Long
@@ -46,9 +44,9 @@ Public Sub Pausa(ByVal segundosAlMaximo As Double)
     Espera segundosAlMaximo / Factor()
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  RUTAS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Function FilaRuta(ByVal id As String) As Long
     Dim ws As Worksheet, f As Variant
     Set ws = Hoja(HOJA_RUTAS)
@@ -115,7 +113,7 @@ Public Sub Viajar(ByVal id As String, ByVal texto As String)
     Dim xs() As Double, ys() As Double, seg() As Double, total As Double
     Dim v As Shape, dur As Double, t0 As Double, u As Double, d As Double, acum As Double, q As Double
 
-    ' sin valor no hay nada que mostrar: se ilumina la ruta y ya
+    ' Si el bus está vacío, simplemente ilumino la ruta para indicar actividad, pero sin simular viaje de información
     If Len(texto) = 0 Then Exit Sub
 
     Set ws = Hoja(HOJA_RUTAS)
@@ -164,9 +162,9 @@ Public Sub Viajar(ByVal id As String, ByVal texto As String)
     v.Visible = msoFalse
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  CHIPS Y DESTELLOS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub Destello(ByVal nombreChip As String)
     Dim s As Shape
     If Not Animando() Then Exit Sub
@@ -188,9 +186,9 @@ Public Function ChipDe(ByVal reg As String) As String
     End Select
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  PANELES
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub FaseMostrar(ByVal fase As String)
     Dim nombres As Variant, colores As Variant, k As Long, s As Shape
     nombres = Array("FETCH", "DECODE", "EXECUTE", "STORE")

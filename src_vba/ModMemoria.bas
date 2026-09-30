@@ -2,19 +2,14 @@ Attribute VB_Name = "ModMemoria"
 Option Explicit
 
 ' =====================================================================
-'  ModMemoria - Memoria principal: 256 posiciones de 8 bits (00h-FFh).
+'  Subsistema de Memoria RAM
 '
-'  Almacen: hoja oculta _RAM, fila = direccion + 1
-'     A  valor (0..255)
-'     B  fila del editor de la instruccion/dato que ocupa el byte (0 = libre)
-'     C  tipo de byte: I = inicio de instruccion | O = operando | D = dato
-'
-'  Primitivas del enunciado: Read(address) y Write(address, value).
-'  (En VBA "Write" es una palabra reservada, por eso se llaman
-'  MemRead y MemWrite.)
-'
-'  Segmentacion logica (solo visual):
-'     00h-7Fh  Segmento de CODIGO     80h-FFh  Segmento de DATOS
+'  Aquí gestionamos el espacio de direccionamiento de la CPU.
+'  Tenemos un total de 256 celdas de 8 bits. Cuando la Unidad de
+'  Control lo solicita, el valor del Memory Address Register (MAR)
+'  selecciona la dirección activa, y el Memory Data Register (MDR)
+'  actúa como búfer intermedio para operaciones de lectura o escritura
+'  a través de los buses correspondientes.
 ' =====================================================================
 
 Public Const SEG_DATOS As Long = &H80
@@ -26,9 +21,9 @@ Private Const C_LEER As Long = 10086143      ' 99E6FF -> amarillo claro (BGR de 
 Private Const C_ESCR As Long = 11389944      ' ADCBF8 -> salmon (BGR de F8CBAD)
 Private Const C_BASE As Long = 16447220      ' F4F6FA gris azulado: sin acceso todavia
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  PRIMITIVAS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function MemRead(ByVal direccion As Long) As Long
     direccion = direccion And &HFF
     MemRead = CLng(Val(CStr(ThisWorkbook.Worksheets(HOJA_RAM).Cells(direccion + 1, 1).Value))) And &HFF
@@ -68,9 +63,9 @@ Public Sub MemReset()
     MemPintarTodo
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  MATRIZ 16 x 16 EN LA HOJA
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function MemCelda(ByVal direccion As Long) As Range
     direccion = direccion And &HFF
     Set MemCelda = Sim().Range("MEM_GRID").Cells((direccion \ 16) + 1, (direccion Mod 16) + 1)
@@ -143,11 +138,11 @@ Public Sub MemMarcarPC(ByVal direccion As Long)
     MemPintar direccion
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  PANEL "PRIMITIVAS DE MEMORIA" DEL DIAGRAMA
 '  Muestra la ultima llamada a Read(address) o Write(address, value):
 '  amarillo = lectura, salmon = escritura (los colores de la matriz).
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub PrimitivaMostrar(ByVal texto As String, ByVal tipo As String)
     Dim s As Shape
     Set s = Forma("PRIM_ULT")
@@ -161,9 +156,9 @@ Public Sub PrimitivaMostrar(ByVal texto As String, ByVal tipo As String)
     End Select
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  VENTANA DE MEMORIA DEL DIAGRAMA (8 filas; la 4a es la celda del MAR)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub MemVentana(ByVal centro As Long)
     Dim i As Long, d As Long
     For i = 1 To 8
@@ -194,9 +189,9 @@ Public Sub MemVentanaResaltar(ByVal tipo As String)
     Next n
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  INSPECTOR (celda seleccionada de la matriz)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub MemInspeccionar(ByVal direccion As Long)
     Dim v As Long, ws As Worksheet, desc As String, tipo As String, op As Long
     Set ws = Sim()

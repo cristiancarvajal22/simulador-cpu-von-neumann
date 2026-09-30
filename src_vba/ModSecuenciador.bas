@@ -2,32 +2,24 @@ Attribute VB_Name = "ModSecuenciador"
 Option Explicit
 
 ' =====================================================================
-'  ModSecuenciador - la Unidad de Control.
+'  Unidad de Control (Secuenciador y Microcódigo)
 '
-'  Cada instruccion se descompone en micro-operaciones agrupadas en las
-'  4 fases del ciclo de instruccion:
-'
-'    FETCH    F1 MAR <- PC      F2 MDR <- M[MAR]   F3 IR <- MDR   F4 PC <- PC+1
-'    DECODE   D1 el Decodificador interpreta el opcode
-'             (si la instruccion ocupa 2 bytes, prepara el operando:
-'              D2 MAR <- PC  D3 MDR <- M[MAR]  D4 IR.op <- MDR  D5 PC <- PC+1)
-'    EXECUTE  la ALU opera, se accede a memoria o se evalua el salto
-'    STORE    write-back: resultado al registro destino o a memoria
-'
-'  El microprograma de la instruccion en curso se escribe en la hoja
-'  oculta _Micro (A fase | B codigo | C texto RTL | D accion | E arg1 | F arg2)
-'  y se ejecuta una fila por cada pulso de reloj (STEP).
-'
-'  Acciones:  XFER src dst | MEMREAD | MEMWRITE | INCPC | DECODE
-'             ALU op | CHK cond | JMPIF | HALT | NOTA
+'  Este es el cerebro de la CPU. El Secuenciador coordina todas las
+'  transferencias de datos activando las señales de control adecuadas
+'  en cada ciclo de reloj.
+'  El ciclo clásico se divide aquí en sus fases fundamentales:
+'  1. Fetch: Recupera la instrucción apuntada por el PC usando MAR y MDR.
+'  2. Decode: Analiza el opcode en el Instruction Register (IR).
+'  3. Execute: La ALU o las unidades correspondientes realizan el trabajo.
+'  4. Store: El resultado se guarda en memoria o registros.
 ' =====================================================================
 
 Private Const N_MAX_MICRO As Long = 40
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  UN PULSO DE RELOJ = UNA MICRO-OPERACION
 '  Devuelve False si la CPU no puede avanzar (HLT o sin programa).
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function MicroPaso() As Boolean
     If CpuNum(R_HALT) = 1 Then
         Estado t("CPU detenida por HLT. Pulsa RESET (o LOAD para recargar el programa)."), False
@@ -57,9 +49,9 @@ Public Function EnFrontera() As Boolean
     EnFrontera = (CpuNum(R_MICRO) < 1 Or CpuNum(R_MICRO) > CpuNum(R_NMICRO))
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  CONSTRUCCION DEL MICROPROGRAMA
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Sub LimpiarMicro()
     Hoja(HOJA_MICRO).Range("A2:F" & (N_MAX_MICRO + 1)).ClearContents
     CpuSet R_NMICRO, 0
@@ -118,7 +110,7 @@ Private Sub CompletarMicroprograma(ByVal op As Long)
     Select Case i.Grupo
         Case "CTRL"
             If i.Mnem = "HLT" Then
-                ' HLT para el reloj en EXECUTE: no hay fase STORE detras
+                ' Al detectar HLT (Halt), detengo el reloj del sistema en la fase de Execute, por lo que nunca llegamos a la fase Store
                 AM "EXECUTE", "E1", "Detener el reloj", "HALT"
             Else
                 AM "EXECUTE", "E1", "NOP: no hay operaci~on", "NOTA"
@@ -190,9 +182,9 @@ Private Function Comp(ByVal reg As String) As String
     End Select
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  EJECUCION DE UNA MICRO-OPERACION
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Sub MicroEjecutar(ByVal k As Long)
     Dim ws As Worksheet, fase As String, codigo As String, texto As String
     Dim accion As String, a1 As String, a2 As String
@@ -388,11 +380,11 @@ Private Function ExplicarAlu(ByVal mn As String, ByVal a As Long, ByVal b As Lon
     ExplicarAlu = s & ". Flags: " & TextoFlags() & "."
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  LOG DE MICRO-OPERACIONES (hoja Log)
 '  A # | B instr | C fase | D micro | E operacion | F detalle |
 '  G..L PC IR MAR MDR AX BX | M..P ZF CF SF OF | Q linea formateada
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub LogAgregar(ByVal fase As String, ByVal codigo As String, ByVal texto As String, ByVal detalle As String)
     Dim ws As Worksheet, n As Long, f As Long, linea As String, fila(1 To 17) As Variant
     Set ws = Hoja(HOJA_LOG)

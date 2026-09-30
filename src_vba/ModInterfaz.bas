@@ -2,24 +2,19 @@ Attribute VB_Name = "ModInterfaz"
 Option Explicit
 
 ' =====================================================================
-'  ModInterfaz - controles de la hoja Simulador.
+'  Módulo de Interacción con el Usuario
 '
-'    LOAD        ensambla el programa del editor y lo carga en memoria
-'    STEP        avanza UNA micro-operacion (un pulso de reloj)
-'    STEP INSTR  avanza hasta terminar la instruccion en curso
-'    RUN         ejecucion continua; la velocidad la marca el deslizador
-'    PAUSE       detiene RUN al terminar la micro-operacion en curso
-'    RESET       registros y PC a cero (la memoria se conserva)
-'
-'  Todos los puntos de entrada atrapan sus errores: un error sin manejar
-'  abriria el depurador y dejaria la hoja bloqueada.
+'  Este script enlaza los botones de la interfaz gráfica con las
+'  operaciones internas del simulador. Nos permite gobernar el
+'  reloj del sistema, enviando pulsos (ciclos) a la Unidad de Control
+'  para ejecutar micro-operaciones paso a paso o en modo continuo.
 ' =====================================================================
 
 Private Const MAX_MICRO_RUN As Long = 20000
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  BOTONES
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub Btn_Load()
     On Error GoTo fallo
     If Ocupado() Then Exit Sub
@@ -122,9 +117,9 @@ Public Sub Btn_Velocidad()
     FijarTexto "LBL_VELOC", "Velocidad " & CpuNum(R_VELOC) & "/10"
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  AUXILIARES
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Sub EsperaEntreMicros()
     If Animando() Then Pausa 0.25 Else Pausa 0.04
 End Sub
@@ -172,7 +167,7 @@ End Sub
 ' Llamado por el generador al construir el libro
 Public Function Ui_Inicializar() As String
     On Error GoTo fallo
-    TeoriaEscribirISA
+    ' TeoriaEscribirISA ' Ya no usamos la hoja Teoria
     EjemploCargar CStr(Sim().Range("EJEMPLO_SEL").Value)
     CpuReset
     LogLimpiar
@@ -183,42 +178,14 @@ fallo:
     Ui_Inicializar = "ERR " & Err.Number & ": " & Err.Description
 End Function
 
-' Tabla de la ISA en la hoja Teoria, generada desde ModISA (una sola fuente)
+' Tabla de la ISA en la hoja Teoria (Comentada porque eliminamos la hoja)
 Public Sub TeoriaEscribirISA()
-    Dim ws As Worksheet, f As Long, ops As Variant, k As Long, i As TInstr, Flags As String
-    Set ws = ThisWorkbook.Worksheets("Teoria")
-    f = ws.Range("ISA_INICIO").Row
-    ws.Range(ws.Cells(f, 1), ws.Cells(f + 80, 6)).ClearContents
-    ws.Cells(f, 1).Value = "Opcode"
-    ws.Cells(f, 2).Value = t("Instrucci~on")
-    ws.Cells(f, 3).Value = "Bytes"
-    ws.Cells(f, 4).Value = t("Operaci~on (RTL)")
-    ws.Cells(f, 5).Value = "Flags"
-    ws.Cells(f, 6).Value = "Modo"
-    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Font.Bold = True
-    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Interior.color = RGB(31, 56, 100)
-    ws.Range(ws.Cells(f, 1), ws.Cells(f, 6)).Font.color = RGB(255, 255, 255)
-    ops = IsaListaOpcodes()
-    For k = LBound(ops) To UBound(ops)
-        i = IsaInfo(ops(k))
-        Flags = ""
-        If InStr(i.Flags, "Z") > 0 Then Flags = Flags & "ZF "
-        If InStr(i.Flags, "C") > 0 Then Flags = Flags & "CF "
-        If InStr(i.Flags, "S") > 0 Then Flags = Flags & "SF "
-        If InStr(i.Flags, "O") > 0 Then Flags = Flags & "OF "
-        If Flags = "" Then Flags = "-"
-        ws.Cells(f + 1 + k, 1).Value = "'" & HexH(ops(k))
-        ws.Cells(f + 1 + k, 2).Value = IsaFormato(ops(k))
-        ws.Cells(f + 1 + k, 3).Value = i.Bytes
-        ws.Cells(f + 1 + k, 4).Value = t(i.desc)
-        ws.Cells(f + 1 + k, 5).Value = Trim$(Flags)
-        ws.Cells(f + 1 + k, 6).Value = IsaModo(ops(k))
-    Next k
+    Exit Sub ' Omitido intencionalmente
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  API DE PRUEBAS (la usan los scripts de verificacion, sin interfaz)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function Test_Cargar(ByVal ejemplo As String) As String
     On Error GoTo fallo
     EjemploCargar ejemplo
@@ -271,9 +238,9 @@ fallo:
     Test_Linea = "ERR " & Err.Description
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  DOCUMENTACION (la usa build\Exportar-Doc.ps1 para el README)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 ' Tabla de la ISA en Markdown, desde ModISA (una sola fuente)
 Public Function Doc_IsaMarkdown() As String
     Dim ops As Variant, k As Long, i As TInstr, s As String, fl As String

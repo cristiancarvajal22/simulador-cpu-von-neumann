@@ -2,18 +2,12 @@ Attribute VB_Name = "ModEditor"
 Option Explicit
 
 ' =====================================================================
-'  ModEditor - presentacion del editor de ensamblador.
+'  Editor de Código Ensamblador
 '
-'  Colorea cada linea como lo haria un editor de codigo, usando el
-'  formato por caracteres de Excel (Range.Characters). El color no es
-'  decorativo: dice que ha entendido el ensamblador de cada palabra.
-'    comentario   gris claro en cursiva (no se ensambla)
-'    etiqueta     morado en negrita
-'    mnemonica    color segun el grupo de la instruccion
-'    registro     magenta
-'    [direccion]  verde azulado
-'    numero       ambar
-'    directiva    gris oscuro en negrita (ORG, DB)
+'  Este código se encarga de analizar sintácticamente las instrucciones
+'  introducidas por el usuario y aplicar resaltado de sintaxis.
+'  Es crucial para distinguir mnemónicos, operandos, registros y
+'  direcciones de memoria, facilitando la programación de la CPU simulada.
 ' =====================================================================
 
 Private Const COL_TXT As Long = 2105376     ' 202020
@@ -31,9 +25,9 @@ Private Const COL_NUM As Long = 28351       ' BF6E00 ambar
 
 Private Const N_FILAS As Long = 40
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  COLOREADO
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub EditorColorearTodo()
     Dim i As Long
     Application.ScreenUpdating = False
@@ -153,10 +147,10 @@ Private Function ColorDeMnemonica(ByVal mn As String) As Long
     End Select
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  RESALTADO DE LA LINEA EN EJECUCION
 '  Solo cambia el fondo: si tocara la negrita se perderia el coloreado.
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub EditorResaltar(ByVal fila As Long)
     Dim ws As Worksheet, anterior As Long
     Set ws = Sim()

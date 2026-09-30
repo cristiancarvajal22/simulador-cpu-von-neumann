@@ -2,19 +2,14 @@ Attribute VB_Name = "ModEnsamblador"
 Option Explicit
 
 ' =====================================================================
-'  ModEnsamblador - traduce el programa del editor a bytes en memoria.
+'  Traductor / Ensamblador del Procesador
 '
-'  Ensamblador de DOS PASADAS:
-'    1a pasada: calcula la direccion y el tamano de cada linea y anota
-'               las etiquetas (las de mas adelante aun no tienen valor).
-'    2a pasada: resuelve etiquetas y numeros y escribe los bytes.
-'
-'  Sintaxis de una linea:   [etiqueta:] [instruccion | directiva] [; comentario]
-'    ORG n          fija la direccion donde se sigue ensamblando
-'    DB a, b, ...   reserva bytes con esos valores (datos)
-'  Numeros:  decimal 12 | hex 0Ch o 0x0C | binario 1010b | negativo -1
-'  Alias x86 aceptados:  MOV reg,[dir] = LOAD   MOV [dir],reg = STORE
-'                        JE = JZ   JNE = JNZ
+'  Este módulo convierte las instrucciones escritas en ensamblador a
+'  lenguaje máquina que nuestra CPU de 8 bits pueda entender.
+'  El proceso requiere dos pasadas: primero, calculamos las direcciones
+'  de memoria (vital para los saltos que modifican el PC)
+'  y en la segunda pasada resolvemos las etiquetas y generamos el
+'  código binario final que se carga en la memoria (vía MDR).
 ' =====================================================================
 
 Private Const N_LINEAS As Long = 40
@@ -28,10 +23,10 @@ Private mDB(1 To N_LINEAS) As String      ' lista de valores de un DB
 Private mError As String
 Private mErrorFila As Long
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  PUNTO DE ENTRADA
 '  Devuelve "OK ..." o "ERR ..." (el texto tambien va a la barra de estado)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function Ensamblar() As String
     Dim ws As Worksheet, cod As Range, etiquetas As Object
     Dim i As Long, total As Long, maxDir As Long, minDato As Long
@@ -67,9 +62,9 @@ fallo:
     Estado t("Error en la l~inea ") & mErrorFila & ": " & mError, True
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  PRIMERA PASADA
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Function PrimeraPasada(ByVal cod As Range, ByVal etiquetas As Object) As Boolean
     Dim i As Long, loc As Long, linea As String, etq As String, resto As String
     Dim mn As String, ops() As String, t1 As String, t2 As String, op As Long, v As Long
@@ -151,9 +146,9 @@ Private Function ResolverOpcode(ByVal i As Long, ByVal mn As String, ops() As St
     ResolverOpcode = True
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  SEGUNDA PASADA
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Function SegundaPasada(ByVal cod As Range, ByVal etiquetas As Object, _
                                ByRef total As Long, ByRef maxDir As Long, ByRef minDato As Long) As Boolean
     Dim ws As Worksheet, i As Long, k As Long, v As Long, bytesTxt As String
@@ -240,9 +235,9 @@ Private Function valor(ByVal i As Long, ByVal s As String, ByVal etiquetas As Ob
     valor = True
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  AYUDANTES DE PARSEO
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Function QuitarComentario(ByVal s As String) As String
     Dim p As Long
     p = InStr(s, ";")
@@ -332,9 +327,9 @@ Private Sub Falla(ByVal fila As Long, ByVal msg As String)
     mError = msg
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  EJEMPLOS  (hoja oculta _Ejemplos: A nombre | B linea)
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub EjemploCargar(ByVal nombre As String)
     Dim ws As Worksheet, r As Long, ultima As Long, k As Long, cod As Range
     Set ws = Hoja(HOJA_EJEMPLOS)

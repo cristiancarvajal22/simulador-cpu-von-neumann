@@ -2,13 +2,16 @@ Attribute VB_Name = "ModCPU"
 Option Explicit
 
 ' =====================================================================
-'  ModCPU - registros, flags y ALU.
+'  Núcleo de la CPU (Registros y Unidad Aritmético-Lógica)
 '
-'  El estado vive en la hoja oculta _CPU (columna B, una fila por
-'  registro). Asi sobrevive aunque el proyecto VBA se reinicie, y el
-'  control deslizante y la casilla "Animar" pueden enlazarse a celdas.
+'  En este módulo simulo la estructura interna del procesador.
+'  Manejo los registros de propósito general (AX, BX), los registros
+'  de control (Program Counter, Instruction Register), y los registros
+'  de memoria (MAR para direcciones, MDR para datos).
+'  También defino la lógica de la ALU y las banderas de estado
+'  (Zero, Carry, Sign, Overflow).
 '
-'  Todos los registros son de 8 bits (0..255).
+'  Todos los registros tienen un ancho de palabra de 8 bits.
 ' =====================================================================
 
 Public Const R_PC As Long = 1
@@ -45,9 +48,9 @@ Public Const R_ULTPC As Long = 31      ' celda marcada como PC en la matriz
 Public Const R_ULTLINEA As Long = 32   ' fila del editor resaltada
 Public Const R_SEL As Long = 33        ' direccion en el Selector
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  ESTADO
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function CpuGet(ByVal r As Long) As Variant
     CpuGet = ThisWorkbook.Worksheets(HOJA_CPU).Cells(r, 2).Value
 End Function
@@ -131,9 +134,9 @@ Public Sub RegPintar(ByVal nombre As String)
     End Select
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  FLAGS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub FlagEscribir(ByVal nombre As String, ByVal b As Boolean)
     Dim r As Long, s As Shape
     Select Case nombre
@@ -175,7 +178,7 @@ Public Function CondicionCumple(ByVal cond As String) As Boolean
     CondicionCumple = (FlagLeer(Left$(cond, 2)) = (Right$(cond, 1) = "1"))
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  ALU
 '  Calcula a <op> b en 8 bits y actualiza SOLO los flags que la
 '  instruccion altera (semantica x86):
@@ -185,7 +188,7 @@ End Function
 '    INC / DEC  no tocan CF
 '    AND OR XOR CF = 0, OF = 0
 '    NOT        no altera ningun flag
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function AluOperar(ByVal mn As String, ByVal a As Long, ByVal b As Long) As Long
     Dim r As Long, bruto As Long
     a = a And &HFF: b = b And &HFF
@@ -214,7 +217,7 @@ Public Function AluOperar(ByVal mn As String, ByVal a As Long, ByVal b As Long) 
             r = (Not a) And &HFF
             CpuSet R_ALU, r
             AluOperar = r
-            Exit Function                  ' NOT no altera flags
+            Exit Function                  ' Ojo aquí: la operación lógica NOT no afecta las banderas de la ALU en esta arquitectura
         Case Else
             Err.Raise vbObjectError + 3, "AluOperar", "Operacion ALU desconocida: " & mn
     End Select
@@ -225,9 +228,9 @@ Public Function AluOperar(ByVal mn As String, ByVal a As Long, ByVal b As Long) 
     AluOperar = r
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  REINICIO Y REPINTADO
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 ' RESET: registros y PC a cero (la memoria no se toca).
 Public Sub CpuReset()
     Dim r As Long

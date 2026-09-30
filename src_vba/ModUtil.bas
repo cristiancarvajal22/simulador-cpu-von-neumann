@@ -2,12 +2,16 @@ Attribute VB_Name = "ModUtil"
 Option Explicit
 
 ' =====================================================================
-'  ModUtil - utilidades compartidas: formatos numericos, tiempos,
-'  acceso a hojas y textos.
+'  Funciones Auxiliares y Constantes
+'
+'  En este módulo he reunido herramientas para dar formato a los
+'  datos numéricos (binario, hexadecimal, manejo de signo), funciones
+'  de temporización que emulan la latencia de componentes físicos,
+'  y referencias a las áreas de almacenamiento interno de la simulación.
 ' =====================================================================
 
 Public Const HOJA_SIM As String = "Simulador"
-Public Const HOJA_LOG As String = "Log"
+Public Const HOJA_LOG As String = "Registros"
 Public Const HOJA_CPU As String = "_CPU"
 Public Const HOJA_RAM As String = "_RAM"
 Public Const HOJA_MICRO As String = "_Micro"
@@ -17,9 +21,9 @@ Public Const HOJA_EJEMPLOS As String = "_Ejemplos"
 
 Public Const DEPURAR As Boolean = False
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  TEXTOS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function t(ByVal s As String) As String
     s = Replace(s, "~a", ChrW(225))
     s = Replace(s, "~e", ChrW(233))
@@ -35,9 +39,9 @@ Public Function t(ByVal s As String) As String
     t = s
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  FORMATOS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function Hex2(ByVal v As Long) As String
     Hex2 = Right$("0" & Hex$(v And &HFF), 2)
 End Function
@@ -101,9 +105,9 @@ Public Function LeerNumero(ByVal s As String, ByRef v As Long) As Boolean
     LeerNumero = True
 End Function
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  HOJAS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function Hoja(ByVal nombre As String) As Worksheet
     Set Hoja = ThisWorkbook.Worksheets(nombre)
 End Function
@@ -141,9 +145,9 @@ Public Sub Estado(ByVal msg As String, Optional ByVal esError As Boolean = False
     End With
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  TIEMPO
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Sub Espera(ByVal segundos As Double)
     Dim t0 As Double
     If segundos <= 0 Then DoEvents: Exit Sub

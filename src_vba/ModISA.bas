@@ -2,24 +2,14 @@ Attribute VB_Name = "ModISA"
 Option Explicit
 
 ' =====================================================================
-'  ModISA - Conjunto de instrucciones (ISA) de la CPU de 8 bits.
+'  Arquitectura del Conjunto de Instrucciones (ISA)
 '
-'  Es la "ROM de decodificacion": para cada opcode dice que instruccion
-'  es, cuantos bytes ocupa, sus operandos y que flags altera. La usan el
-'  Decodificador (fase DECODE), el ensamblador y el desensamblador.
-'
-'  Codificacion sistematica del opcode (1 byte):
-'     nibble alto = operacion      nibble bajo = modo / registros
-'       0 control (HLT, NOP)         x0  AX, imm     (2 bytes)
-'       1 MOV                        x1  BX, imm     (2 bytes)
-'       2 LOAD / STORE               x2  AX, BX      (1 byte)
-'       3 ADD   4 SUB   5 CMP        x3  BX, AX      (1 byte)
-'       6 INC / DEC / NOT
-'       7 AND   8 OR    9 XOR
-'       A saltos (JMP, JZ, JNZ, JC, JNC, JS, JNS)
-'  HLT vale 00h a proposito: una zona de memoria vacia detiene la CPU.
-'
-'  Tipos de operando:  AX | BX | IMM (inmediato) | MEM ([dir]) | DIR (destino de salto)
+'  Aquí defino el repertorio de instrucciones que el Decodificador de
+'  la Unidad de Control es capaz de interpretar.
+'  Mapeamos cada código de operación (opcode) de 8 bits a su
+'  correspondiente microprograma. Por ejemplo, se definen operaciones
+'  de carga (usando MAR y MDR), aritméticas (que usan la ALU), y saltos
+'  (que modifican el PC directamente si se cumplen las condiciones).
 ' =====================================================================
 
 Public Type TInstr
@@ -37,9 +27,9 @@ Private mTabla(0 To 255) As TInstr
 Private mDefinido(0 To 255) As Boolean
 Private mListo As Boolean
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  DEFINICION DE LA TABLA
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Private Sub Def(ByVal op As Long, ByVal mn As String, ByVal o1 As String, ByVal o2 As String, _
                 ByVal nb As Long, ByVal fl As String, ByVal gr As String, ByVal ds As String)
     With mTabla(op)
@@ -103,9 +93,9 @@ Public Sub IsaInit()
     mListo = True
 End Sub
 
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 '  CONSULTAS
-' =====================================================================
+' /////////////////////////////////////////////////////////////////
 Public Function IsaExiste(ByVal op As Long) As Boolean
     IsaInit
     If op < 0 Or op > 255 Then IsaExiste = False Else IsaExiste = mDefinido(op)
@@ -240,7 +230,7 @@ Public Function IsaSimbolo(ByVal op As Long) As String
     End Select
 End Function
 
-' Numero de opcodes definidos (para la tabla de la hoja Teoria)
+' Número de opcodes disponibles en el Instruction Set
 Public Function IsaListaOpcodes() As Variant
     Dim op As Long, n As Long, r() As Long
     IsaInit
