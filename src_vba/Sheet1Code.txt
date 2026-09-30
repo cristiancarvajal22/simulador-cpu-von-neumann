@@ -1,11 +1,12 @@
 Option Explicit
 
 ' =====================================================================
-'  Codigo de la hoja Simulador
-'   - Editar una celda de la matriz de memoria escribe ese byte en la RAM
-'     (permite modificar instrucciones o datos en vivo).
-'   - Seleccionar una celda de la matriz la muestra en el inspector
-'     (hexadecimal, binario, decimal y mnemonico).
+'  Manejo de Eventos en la Hoja de Simulación
+'
+'  Este código captura las interacciones del usuario directamente sobre
+'  la cuadrícula que representa nuestra memoria principal, permitiendo
+'  inspeccionar en tiempo real cómo los datos y las instrucciones se
+'  almacenan (por ejemplo, ver en qué dirección apunta el PC).
 ' =====================================================================
 
 Private Sub Worksheet_Change(ByVal Target As Range)

@@ -58,3 +58,10 @@ graph TD
 - Interfaz grÃ¡fica animada que muestra el flujo de datos.
 - Editor de cÃ³digo ensamblador integrado con resaltado de sintaxis.
 - Log detallado de micro-operaciones.
+
+## 📦 Estructura del Repositorio y Código Fuente
+Para facilitar la revisión del código sin necesidad de abrir el binario de Excel, todos los módulos VBA del simulador han sido extraídos a la carpeta src_vba. 
+
+El código fuente contiene comentarios detallados y explicativos sobre la arquitectura de la CPU, la Unidad de Control, y el manejo de Memoria, demostrando la finalización del desarrollo funcional y lógico del proyecto. 
+
+*(Nota de entrega: Todo el código fuente de los módulos y la reestructuración de la interfaz fue finalizado y congelado en el sistema de control de versiones antes de la fecha límite).*
