@@ -1,0 +1,7 @@
+﻿# Archivos temporales de Excel
+~$*.xlsm
+~$*.xlsx
+*.tmp
+
+# Archivos de depuracin
+traza_vba.log
